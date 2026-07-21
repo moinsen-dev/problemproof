@@ -26,9 +26,11 @@ Interpret `$problemproof <intent>` and equivalent natural language. Use these in
 - `park`: Save the idea with a cooling-off date and no implied commitment.
 - `personal`: Classify the work honestly as personal utility, learning project, creative experiment, technical exercise, or lifestyle tool.
 - `decision`: Choose Stop, Observe further, Validate before building, Narrow the target group, Reframe the problem, Prototype one critical assumption, or Proceed to opportunity shaping.
-- `status`: Summarize lifecycle state, evidence gate, verdict, and next evidence-producing action.
+- `status`: Summarize lifecycle state, evidence gate, verdict, active account, or linked remote problem metrics.
 - `init`: Create a local artifact workspace without overwriting existing work.
 - `publish`: Publish a solution-free problem to the configured ProblemProof API only after explicit user confirmation.
+- `sync`: Pull remote ProblemProof metrics back into the local artifact workspace.
+- `open`: Print or open the linked public ProblemProof URL.
 
 If the intent is ambiguous, capture the idea and ask one focused question that most reduces decision uncertainty. Do not turn a capture request into validation, publishing, or brainstorming.
 
@@ -146,7 +148,7 @@ Use the script's `gate`, `decision`, `transition`, and `check` commands as defin
 
 ## Publish to ProblemProof
 
-Use `publish` only when the user explicitly confirms that a problem should be public. Publish only the solution-free problem statement, target group, region, category, consequence, origin, participant ID, and `source=skill`. Do not include raw notes, private transcripts, secrets, repository names that should remain private, or personal data about third parties.
+Use `publish` only when the user explicitly confirms that a problem should be public. Publish only the short public title, solution-free problem statement, target group, region, category, consequence, origin, and `source=skill`. Do not include raw notes, private transcripts, secrets, repository names that should remain private, or personal data about third parties.
 
 Run:
 
@@ -159,6 +161,8 @@ Then publish with:
 
 ```bash
 python3 <this-skill-dir>/scripts/problemproof_workspace.py publish \
+  --project "<problem-proof-directory>" \
+  --title "<short public problem title>" \
   --statement "<solution-free problem>" \
   --origin firsthand \
   --target-group "<smallest target group>" \
@@ -166,6 +170,19 @@ python3 <this-skill-dir>/scripts/problemproof_workspace.py publish \
   --category "<category>" \
   --consequence "<observable consequence>" \
   --yes
+```
+
+After publishing or when revisiting a linked workspace, pull remote validation signals back:
+
+```bash
+python3 <this-skill-dir>/scripts/problemproof_workspace.py sync \
+  --project "<problem-proof-directory>"
+
+python3 <this-skill-dir>/scripts/problemproof_workspace.py status \
+  --project "<problem-proof-directory>"
+
+python3 <this-skill-dir>/scripts/problemproof_workspace.py open \
+  --project "<problem-proof-directory>"
 ```
 
 The default API target is `https://problemproof.moinsen.dev/api/problems`. Use `--api-url` for local or staging environments. Prefer `login` or `PROBLEMPROOF_TOKEN` over writing tokens into shell history. With an authenticated token, the server associates the published problem with the user's private ProblemProof account and ignores any legacy local participant ID for ownership.

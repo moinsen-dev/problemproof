@@ -11,6 +11,7 @@ export type Frequency = (typeof FREQUENCIES)[number];
 export interface ProblemRow {
   id: number;
   slug: string;
+  title: string;
   statement: string;
   origin: Origin;
   target_group: string;
@@ -24,6 +25,8 @@ export interface ProblemRow {
   incidents_count: number;
   average_severity: number | null;
   workarounds: string | null;
+  views_count: number;
+  shares_count: number;
   is_favorite: 0 | 1;
   user_confirmed: 0 | 1;
   user_incident: 0 | 1;
@@ -39,6 +42,7 @@ export interface FeedFilters {
 }
 
 export interface ProblemInput {
+  title: string;
   statement: string;
   origin: Origin;
   targetGroup: string;

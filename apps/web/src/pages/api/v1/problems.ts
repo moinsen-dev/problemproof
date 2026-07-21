@@ -11,11 +11,13 @@ export const GET: APIRoute = async ({ url }) => {
   if (category) { where.push('p.category = ?'); values.push(category); }
   const result = await env.DB.prepare(`
     SELECT
-      p.id, p.slug, p.statement, p.origin, p.target_group, p.region, p.category,
+      p.id, p.slug, p.title, p.statement, p.origin, p.target_group, p.region, p.category,
       p.consequence, p.source, p.proof_status, p.created_at,
       COUNT(DISTINCT c.id) AS confirmations,
       COUNT(DISTINCT e.id) AS incidents,
-      ROUND(AVG(e.severity), 1) AS average_severity
+      ROUND(AVG(e.severity), 1) AS average_severity,
+      (SELECT COUNT(*) FROM problem_events ev WHERE ev.problem_id = p.id AND ev.event_type = 'view') AS views,
+      (SELECT COUNT(*) FROM problem_events ev WHERE ev.problem_id = p.id AND ev.event_type = 'share') AS shares
     FROM problems p
     LEFT JOIN confirmations c ON c.problem_id = p.id
     LEFT JOIN evidence e ON e.problem_id = p.id

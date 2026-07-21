@@ -1,25 +1,36 @@
 ---
 import type { ProblemRow } from '../lib/types';
+import { validationLabel } from '../lib/problems';
 
 interface Props { problem: ProblemRow; position: number }
 const { problem, position } = Astro.props;
 const originLabel = problem.origin === 'firsthand' ? 'Selbst erlebt' : 'Hypothese';
 const sourceLabel = problem.source === 'skill' ? 'via Skill' : problem.source === 'api' ? 'via API' : 'via Web';
 const workarounds = (problem.workarounds ?? '').split(',').map((item) => item.trim()).filter(Boolean).slice(0, 3);
-const reportUrl = `mailto:developer@moinsen.dev?subject=${encodeURIComponent(`ProblemProof: Inhalt #${problem.id} melden`)}&body=${encodeURIComponent(`Ich möchte folgenden Inhalt melden:\n\nProblem-ID: ${problem.id}\nURL: https://problemproof.moinsen.dev/#problem-${problem.id}\n\nGrund der Meldung:\n`)}`;
+const detailPath = `/problems/${problem.slug}`;
+const detailUrl = `https://problemproof.moinsen.dev${detailPath}`;
+const reportUrl = `mailto:developer@moinsen.dev?subject=${encodeURIComponent(`ProblemProof: Inhalt #${problem.id} melden`)}&body=${encodeURIComponent(`Ich möchte folgenden Inhalt melden:\n\nProblem-ID: ${problem.id}\nURL: ${detailUrl}\n\nGrund der Meldung:\n`)}`;
 ---
 
-<article class="problem" id={`problem-${problem.id}`} data-problem-id={problem.id} style={`--delay: ${Math.min(position * 45, 220)}ms`}>
+<article class="problem" id={`problem-${problem.id}`} data-problem-id={problem.id} data-problem-url={detailPath} style={`--delay: ${Math.min(position * 45, 220)}ms`}>
   <div class="proof-rail" aria-hidden="true"><span></span></div>
   <div class="problem-body">
     <div class="eyebrow-row">
       <span class:list={['origin', problem.origin]}>{originLabel}</span>
       <span class:list={['source', problem.source]}>{sourceLabel}</span>
+      <span class="validation-pill">{validationLabel(problem)}</span>
       <span>{problem.region}</span>
       <span>{problem.target_group}</span>
     </div>
-    <h2>{problem.statement}</h2>
+    <h2><a href={detailPath}>{problem.title}</a></h2>
+    <p class="problem-statement">{problem.statement}</p>
     <p class="consequence">{problem.consequence}</p>
+    <div class="metric-row" aria-label="Problem-Signale">
+      <span>{problem.views_count} Views</span>
+      <span>{problem.shares_count} Shares</span>
+      <span>{problem.confirmations_count} Bestätigungen</span>
+      <span>{problem.incidents_count} Vorfälle</span>
+    </div>
     {workarounds.length > 0 && (
       <div class="workarounds" aria-label="Genutzte Workarounds">
         <span class="workarounds-label">Bisherige Workarounds</span>
@@ -45,6 +56,10 @@ const reportUrl = `mailto:developer@moinsen.dev?subject=${encodeURIComponent(`Pr
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.2"/><circle cx="6" cy="12" r="2.2"/><circle cx="18" cy="19" r="2.2"/><path d="m8 11 8-5M8 13l8 5"/></svg>
         <span>Teilen</span>
       </button>
+      <a class="action-button detail-button" href={detailPath}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+        <span>Details</span>
+      </a>
       <a class="action-button report-button" href={reportUrl} aria-label={`Problem ${problem.id} melden`}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8v5M12 17h.01"/><path d="M10.3 3.7 2.5 17.2A2 2 0 0 0 4.2 20h15.6a2 2 0 0 0 1.7-2.8L13.7 3.7a2 2 0 0 0-3.4 0Z"/></svg>
         <span>Inhalt melden</span>

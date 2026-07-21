@@ -4,6 +4,7 @@ import { parseEvidenceInput, parseProblemInput, slugify } from '../src/lib/valid
 describe('problem validation', () => {
   it('accepts a concise problem without a proposed solution', () => {
     const result = parseProblemInput({
+      title: 'Infrastruktur frisst Side-Project-Zeit',
       statement: 'Beim Start eines Side Projects verliere ich mehr Zeit mit Infrastruktur als mit dem Produkt.',
       origin: 'firsthand',
       targetGroup: 'Entwickler',
@@ -14,6 +15,7 @@ describe('problem validation', () => {
       source: 'skill',
     });
     expect(result.errors).toEqual([]);
+    expect(result.data?.title).toBe('Infrastruktur frisst Side-Project-Zeit');
     expect(result.data?.statement).toContain('Side Projects');
     expect(result.data?.source).toBe('skill');
   });
@@ -29,6 +31,7 @@ describe('problem validation', () => {
       participantId: 'participant-123',
     });
     expect(result.errors).toEqual([]);
+    expect(result.data?.title).toContain('Solo-Entwickler starten');
     expect(result.data?.source).toBe('web');
   });
 

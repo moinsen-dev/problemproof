@@ -10,10 +10,12 @@ import os
 import re
 import sys
 import tempfile
+import webbrowser
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
+from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
 
 
@@ -170,9 +172,10 @@ def site_api_url(site_url: str, path: str) -> str:
 def api_get_json(url: str, token: str, timeout_seconds: int) -> dict[str, Any]:
     headers = {
         "accept": "application/json",
-        "authorization": f"Bearer {token}",
         "user-agent": "ProblemProofSkill/0.1 (+https://github.com/moinsen-dev/problemproof)",
     }
+    if token:
+        headers["authorization"] = f"Bearer {token}"
     request = Request(url, headers=headers, method="GET")
     try:
         with urlopen(request, timeout=timeout_seconds) as response:
@@ -189,6 +192,95 @@ def api_get_json(url: str, token: str, timeout_seconds: int) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise WorkspaceError("request returned non-object JSON")
     return data
+
+
+def compact_title(statement: str) -> str:
+    normalized = " ".join(statement.split()).rstrip(".!?:;")
+    if len(normalized) <= 80:
+        return normalized
+    return normalized[:77].strip() + "…"
+
+
+def site_url_from_api_url(api_url: str) -> str:
+    parsed = urlparse(api_url)
+    if not parsed.scheme or not parsed.netloc:
+        return DEFAULT_SITE_URL
+    return f"{parsed.scheme}://{parsed.netloc}"
+
+
+def remote_problem_from_state(state: dict[str, Any]) -> dict[str, Any]:
+    remote = state.get("remote_problem")
+    return remote if isinstance(remote, dict) else {}
+
+
+def problem_identifier(args: argparse.Namespace, state: dict[str, Any] | None = None) -> str:
+    explicit = getattr(args, "problem", None)
+    if explicit:
+        return str(explicit)
+    if state:
+        remote = remote_problem_from_state(state)
+        for key in ("slug", "id"):
+            value = remote.get(key)
+            if value:
+                return str(value)
+    raise WorkspaceError("no remote problem is linked; pass --problem or publish with --project first")
+
+
+def fetch_problem(site_url: str, identifier: str, token: str, timeout_seconds: int) -> dict[str, Any]:
+    return api_get_json(
+        site_api_url(site_url, f"/api/problems/{quote(identifier)}"),
+        token,
+        timeout_seconds,
+    )
+
+
+def remote_problem_snapshot(problem: dict[str, Any], site_url: str) -> dict[str, Any]:
+    return {
+        "id": problem.get("id"),
+        "slug": problem.get("slug"),
+        "title": problem.get("title"),
+        "url": problem.get("url") or site_api_url(site_url, f"/problems/{problem.get('slug')}"),
+        "validation_status": problem.get("validationStatus"),
+        "metrics": {
+            "views": problem.get("views", 0),
+            "shares": problem.get("shares", 0),
+            "confirmations": problem.get("confirmations", 0),
+            "incidents": problem.get("incidents", 0),
+            "averageSeverity": problem.get("averageSeverity"),
+        },
+        "last_synced_at": timestamp(),
+    }
+
+
+def save_remote_problem(project: Path, problem: dict[str, Any], site_url: str, event_type: str) -> dict[str, Any]:
+    state = load_valid_state(project)
+    previous = remote_problem_from_state(state)
+    snapshot = remote_problem_snapshot(problem, site_url)
+    if previous.get("published_at"):
+        snapshot["published_at"] = previous["published_at"]
+    elif event_type == "problem-published":
+        snapshot["published_at"] = timestamp()
+    state["remote_problem"] = snapshot
+    state["updated_at"] = timestamp()
+    atomic_write_json(project / "state.json", state)
+    append_history(
+        project,
+        event_type,
+        f"Remote problem `{snapshot.get('title')}` linked at {snapshot.get('url')}. "
+        f"Validation: {snapshot.get('validation_status') or 'unknown'}. "
+        f"Metrics: {json.dumps(snapshot.get('metrics'), ensure_ascii=False)}",
+    )
+    return snapshot
+
+
+def print_remote_problem(problem: dict[str, Any]) -> None:
+    print(f"Problem: {problem.get('title')}")
+    print(f"URL: {problem.get('url')}")
+    print(f"Status: {problem.get('validationStatus')}")
+    print(f"Views: {problem.get('views', 0)}")
+    print(f"Shares: {problem.get('shares', 0)}")
+    print(f"Confirmations: {problem.get('confirmations', 0)}")
+    print(f"Incidents: {problem.get('incidents', 0)}")
 
 
 def utc_now() -> datetime:
@@ -696,6 +788,19 @@ def command_login(args: argparse.Namespace) -> None:
 
 
 def command_status(args: argparse.Namespace) -> None:
+    if getattr(args, "project", None) or getattr(args, "problem", None):
+        project = project_path(args.project) if getattr(args, "project", None) else None
+        state = load_valid_state(project) if project else None
+        site_url = args.site_url or str(load_config().get("site_url") or DEFAULT_SITE_URL)
+        problem = fetch_problem(
+            site_url,
+            problem_identifier(args, state),
+            configured_token(),
+            args.timeout_seconds,
+        )
+        print_remote_problem(problem)
+        return
+
     token = configured_token()
     if not token:
         raise WorkspaceError(
@@ -710,6 +815,38 @@ def command_status(args: argparse.Namespace) -> None:
     source = "PROBLEMPROOF_TOKEN" if os.environ.get("PROBLEMPROOF_TOKEN") else str(config_path())
     print(f"Logged in as {account.get('displayName')} (account {account.get('id')})")
     print(f"Token source: {source}")
+
+
+def command_sync(args: argparse.Namespace) -> None:
+    project = project_path(args.project) if args.project else None
+    state = load_valid_state(project) if project else None
+    site_url = args.site_url or str(load_config().get("site_url") or DEFAULT_SITE_URL)
+    problem = fetch_problem(
+        site_url,
+        problem_identifier(args, state),
+        configured_token(),
+        args.timeout_seconds,
+    )
+    if project:
+        save_remote_problem(project, problem, site_url, "remote-problem-synced")
+    print_remote_problem(problem)
+
+
+def command_open(args: argparse.Namespace) -> None:
+    url = args.url
+    if not url and args.project:
+        state = load_valid_state(project_path(args.project))
+        remote = remote_problem_from_state(state)
+        url = str(remote.get("url") or "")
+    if not url and args.problem:
+        site_url = args.site_url or str(load_config().get("site_url") or DEFAULT_SITE_URL)
+        problem = fetch_problem(site_url, str(args.problem), configured_token(), args.timeout_seconds)
+        url = str(problem.get("url") or "")
+    if not url:
+        raise WorkspaceError("no remote problem URL found; pass --url, --problem, or --project")
+    print(url)
+    if args.browser:
+        webbrowser.open(url)
 
 
 def command_logout(args: argparse.Namespace) -> None:
@@ -732,7 +869,9 @@ def command_publish(args: argparse.Namespace) -> None:
             "publish requires a ProblemProof token; create one under /account/ and run `login`, pass --token, or set PROBLEMPROOF_TOKEN"
         )
     participant_id = args.participant_id or "account-token"
+    title = args.title or compact_title(args.statement)
     payload = {
+        "title": single_line(title, "title", maximum=80),
         "statement": single_line(args.statement, "statement", maximum=280),
         "origin": args.origin,
         "targetGroup": single_line(args.target_group, "target group", maximum=80),
@@ -766,7 +905,12 @@ def command_publish(args: argparse.Namespace) -> None:
         result = json.loads(response_body)
     except json.JSONDecodeError as error:
         raise WorkspaceError(f"publish returned invalid JSON: {response_body}") from error
+    site_url = site_url_from_api_url(args.api_url)
+    if args.project:
+        save_remote_problem(project_path(args.project), result, site_url, "problem-published")
     print(f"Published problem {result.get('id')} ({result.get('slug')})")
+    if result.get("url"):
+        print(f"URL: {result.get('url')}")
 
 
 def command_repo_gate(args: argparse.Namespace) -> None:
@@ -874,11 +1018,33 @@ def build_parser() -> argparse.ArgumentParser:
     login_parser.set_defaults(handler=command_login)
 
     status_parser = subparsers.add_parser(
-        "status", help="verify the active ProblemProof publishing account"
+        "status", help="verify the active account or inspect a linked remote problem"
     )
+    status_parser.add_argument("--project", help="local ProblemProof artifact directory")
+    status_parser.add_argument("--problem", help="remote problem id or slug")
     status_parser.add_argument("--site-url")
     status_parser.add_argument("--timeout-seconds", type=int, default=15)
     status_parser.set_defaults(handler=command_status)
+
+    sync_parser = subparsers.add_parser(
+        "sync", help="sync remote ProblemProof metrics into a local artifact workspace"
+    )
+    sync_parser.add_argument("--project", help="local ProblemProof artifact directory")
+    sync_parser.add_argument("--problem", help="remote problem id or slug")
+    sync_parser.add_argument("--site-url")
+    sync_parser.add_argument("--timeout-seconds", type=int, default=15)
+    sync_parser.set_defaults(handler=command_sync)
+
+    open_parser = subparsers.add_parser(
+        "open", help="print or open the remote ProblemProof problem URL"
+    )
+    open_parser.add_argument("--project", help="local ProblemProof artifact directory")
+    open_parser.add_argument("--problem", help="remote problem id or slug")
+    open_parser.add_argument("--url", help="explicit ProblemProof URL")
+    open_parser.add_argument("--site-url")
+    open_parser.add_argument("--timeout-seconds", type=int, default=15)
+    open_parser.add_argument("--browser", action="store_true", help="open the URL in the default browser")
+    open_parser.set_defaults(handler=command_open)
 
     logout_parser = subparsers.add_parser(
         "logout", help="remove the locally stored ProblemProof token"
@@ -889,6 +1055,8 @@ def build_parser() -> argparse.ArgumentParser:
         "publish", help="publish a confirmed problem to the ProblemProof API"
     )
     publish_parser.add_argument("--api-url", default=DEFAULT_API_URL)
+    publish_parser.add_argument("--project", help="local ProblemProof artifact directory to link after publishing")
+    publish_parser.add_argument("--title", help="short public problem title; defaults to a compact statement title")
     publish_parser.add_argument("--statement", required=True)
     publish_parser.add_argument("--origin", required=True, choices=("firsthand", "hypothesis"))
     publish_parser.add_argument("--target-group", required=True)

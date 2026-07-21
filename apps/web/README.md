@@ -9,7 +9,10 @@ Produktion: [problemproof.moinsen.dev](https://problemproof.moinsen.dev)
 ```text
 Astro-Seite
   ├─ GET /                         Feed, Suche und Filter
+  ├─ GET /problems/:slug           teilbare Detailseite mit OpenGraph
   ├─ POST /api/problems           Problem veröffentlichen
+  ├─ GET /api/problems/:id-or-slug einzelnes Problem mit privaten User-States
+  ├─ POST /api/problems/:id/events privacy-freundliche View/Share Events
   ├─ POST /api/problems/:id/signal
   ├─ POST /api/problems/:id/evidence
   ├─ POST/DELETE /api/problems/:id/favorite
@@ -27,10 +30,11 @@ Astro-Seite
                        ├─ evidence
                        ├─ users / identities / sessions
                        ├─ favorites
-                       └─ personal_tokens
+                       ├─ personal_tokens
+                       └─ problem_events
 ```
 
-`confirmations` und `evidence` speichern pro Problem und internem Account höchstens einen Datensatz. Legacy-Daten mit anonymer Teilnehmer-ID bleiben lesbar. `evidence` verlangt einen konkreten eigenen Vorfall mit Zeitpunkt, Häufigkeit, Schweregrad, Geschichte, Region und optionalem Workaround.
+Jedes Problem hat einen kurzen `title`, eine lösungsfreie `statement`-Beschreibung und eine eigene Detailseite unter `/problems/:slug`. `confirmations` und `evidence` speichern pro Problem und internem Account höchstens einen Datensatz. Legacy-Daten mit anonymer Teilnehmer-ID bleiben lesbar. `problem_events` speichert nur aggregierbare View/Share-Signale ohne IP-Adressen, User-Agent-Fingerprinting oder rohe Viewerprofile.
 
 ## GitHub Auth und Skill Tokens
 
@@ -49,7 +53,7 @@ GitHub OAuth App:
 - Callback URL: `https://problemproof.moinsen.dev/auth/github/callback`
 - Scopes: keine optionalen Scopes anfordern
 
-Skill-Publishing kann mit einem persönlichen ProblemProof-Token erfolgen, der unter `/account/` erzeugt wird. Der Token wird nur einmal angezeigt; gespeichert wird nur ein Hash. Der Skill kann den Token per `login` lokal speichern, per `status` über `GET /api/account/me` prüfen und veröffentlicht danach accountgebunden per Bearer-Token.
+Skill-Publishing kann mit einem persönlichen ProblemProof-Token erfolgen, der unter `/account/` erzeugt wird. Der Token wird nur einmal angezeigt; gespeichert wird nur ein Hash. Der Skill kann den Token per `login` lokal speichern, per `status` über `GET /api/account/me` prüfen und veröffentlicht danach accountgebunden per Bearer-Token. `publish --project ...` speichert die Remote-Problem-ID und URL lokal; `sync`, `status --project` und `open --project` schließen den Loop zurück in den Skill.
 
 ## Lokal entwickeln
 
@@ -94,10 +98,13 @@ Wrangler deployt den Worker `problemproof` auf die Custom Domain `problemproof.m
   "data": [
     {
       "id": 1,
+      "title": "Repo-Reflex vor Problemklärung",
       "statement": "…",
       "confirmations": 38,
       "incidents": 12,
-      "average_severity": 3.5
+      "average_severity": 3.5,
+      "views": 120,
+      "shares": 9
     }
   ],
   "privacy": "Nur aggregierte Interaktionen; keine Teilnehmer-IDs und keine Vorfalltexte."

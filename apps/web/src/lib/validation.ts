@@ -12,8 +12,10 @@ const participant = (value: unknown) => text(value).slice(0, 120);
 
 export function parseProblemInput(value: unknown): { data?: ProblemInput; errors: string[] } {
   const body = (value ?? {}) as Record<string, unknown>;
+  const statement = text(body.statement);
   const data: ProblemInput = {
-    statement: text(body.statement),
+    title: text(body.title) || compactTitle(statement),
+    statement,
     origin: text(body.origin) as ProblemInput['origin'],
     targetGroup: text(body.targetGroup),
     region: text(body.region),
@@ -23,6 +25,7 @@ export function parseProblemInput(value: unknown): { data?: ProblemInput; errors
     source: (text(body.source) || 'web') as ProblemInput['source'],
   };
   const errors: string[] = [];
+  if (data.title.length < 3 || data.title.length > 80) errors.push('Der Titel muss 3 bis 80 Zeichen lang sein.');
   if (data.statement.length < 20 || data.statement.length > 280) errors.push('Das Problem muss 20 bis 280 Zeichen lang sein.');
   if (!ORIGINS.includes(data.origin)) errors.push('Bitte wähle den Ursprung des Problems.');
   if (data.targetGroup.length < 2 || data.targetGroup.length > 80) errors.push('Bitte nenne eine klare Zielgruppe.');
@@ -58,8 +61,15 @@ export function parseEvidenceInput(value: unknown): { data?: EvidenceInput; erro
   return errors.length ? { errors } : { data, errors };
 }
 
-export function slugify(statement: string): string {
-  return statement
+export function compactTitle(statement: string): string {
+  const normalized = text(statement);
+  if (!normalized) return '';
+  const withoutTrailing = normalized.replace(/[.!?:;]+$/g, '');
+  return withoutTrailing.length <= 80 ? withoutTrailing : `${withoutTrailing.slice(0, 77).trim()}…`;
+}
+
+export function slugify(value: string): string {
+  return value
     .toLocaleLowerCase('de')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')

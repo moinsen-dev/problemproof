@@ -22,6 +22,12 @@
       </fieldset>
 
       <label class="field field-wide">
+        <span>Kurzer Titel</span>
+        <input name="title" minlength="3" maxlength="80" required placeholder="z. B. Repo-Reflex vor Problemklärung" />
+        <small>Der Titel macht das Problem teilbar und im Feed schnell wiedererkennbar.</small>
+      </label>
+
+      <label class="field field-wide">
         <span>Problem</span>
         <textarea name="statement" rows="4" minlength="20" maxlength="280" required placeholder="Wenn … versucht … entsteht … weil …"></textarea>
         <span class="field-meta"><small class="solution-warning" hidden>Lösungsbegriff erkannt – formuliere nur das Problem.</small><small><output id="statement-count">0</output>/280</small></span>

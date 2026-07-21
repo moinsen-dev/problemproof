@@ -105,8 +105,13 @@ class WorkspaceScriptTests(unittest.TestCase):
     def test_publish_documents_personal_token_flag(self) -> None:
         result = self.run_script("publish", "--help")
         self.assertIn("--token", result.stdout)
+        self.assertIn("--title", result.stdout)
+        self.assertIn("--project", result.stdout)
         self.assertIn("login", result.stdout)
         self.assertIn("PROBLEMPROOF_TOKEN", result.stdout)
+
+        self.assertIn("sync", self.run_script("sync", "--help").stdout)
+        self.assertIn("open", self.run_script("open", "--help").stdout)
 
     def test_publish_requires_token_before_network(self) -> None:
         with tempfile.TemporaryDirectory() as config_dir:
@@ -147,6 +152,21 @@ class WorkspaceScriptTests(unittest.TestCase):
             config = json.loads(config_path.read_text(encoding="utf-8"))
             self.assertNotIn("token", config)
             self.assertNotIn("account", config)
+
+    def test_open_prints_linked_remote_problem_url(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = self.initialize(Path(directory))
+            state_path = project / "state.json"
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            state["remote_problem"] = {
+                "id": 42,
+                "slug": "repo-reflex",
+                "title": "Repo-Reflex",
+                "url": "https://problemproof.moinsen.dev/problems/repo-reflex",
+            }
+            state_path.write_text(json.dumps(state), encoding="utf-8")
+            result = self.run_script("open", "--project", str(project))
+            self.assertIn("https://problemproof.moinsen.dev/problems/repo-reflex", result.stdout)
 
     def test_repo_gate_creates_unique_pre_repo_record(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

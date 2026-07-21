@@ -28,7 +28,7 @@ problem-proof/
 └── history.md
 ```
 
-`state.json` is the machine-readable lifecycle record. Markdown files remain human-readable. `history.md` is append-only. Do not add credentials, raw access tokens, or unnecessary personal data.
+`state.json` is the machine-readable lifecycle record. Markdown files remain human-readable. `history.md` is append-only. Do not add credentials, raw access tokens, or unnecessary personal data. `state.json.remote_problem` may store public ProblemProof metadata and aggregate metrics, but never API tokens, session cookies, private provider identifiers, or raw viewer data.
 
 ## 2. Non-destructive workspace commands
 
@@ -120,6 +120,8 @@ Then publish:
 
 ```bash
 python3 <skill-dir>/scripts/problemproof_workspace.py publish \
+  --project <problem-proof-directory> \
+  --title "<short public problem title>" \
   --statement "<solution-free problem>" \
   --origin firsthand \
   --target-group "<smallest target group>" \
@@ -129,7 +131,22 @@ python3 <skill-dir>/scripts/problemproof_workspace.py publish \
   --yes
 ```
 
-`publish` sends `source=skill`. With an authenticated token, the server associates the problem with the private ProblemProof account and ignores any legacy local participant ID for ownership. Prefer `login` or `PROBLEMPROOF_TOKEN` over passing `--token` when shell history is persistent. Use `logout` to remove the locally stored token. Publishing must not include raw notes, secrets, private transcripts, or personal data about third parties.
+`publish` sends `source=skill`. With an authenticated token, the server associates the problem with the private ProblemProof account and ignores any legacy local participant ID for ownership. If `--project` is provided, the script stores `remote_problem` in `state.json` with id, slug, URL, validation status, latest metrics, and sync timestamp.
+
+Pull remote metrics back into the local workspace:
+
+```bash
+python3 <skill-dir>/scripts/problemproof_workspace.py sync \
+  --project <problem-proof-directory>
+
+python3 <skill-dir>/scripts/problemproof_workspace.py status \
+  --project <problem-proof-directory>
+
+python3 <skill-dir>/scripts/problemproof_workspace.py open \
+  --project <problem-proof-directory>
+```
+
+Prefer `login` or `PROBLEMPROOF_TOKEN` over passing `--token` when shell history is persistent. Use `logout` to remove the locally stored token. Publishing must not include raw notes, secrets, private transcripts, or personal data about third parties.
 
 ## 3. State and transitions
 

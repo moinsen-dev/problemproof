@@ -1,12 +1,12 @@
 PRAGMA foreign_keys = ON;
 
 INSERT OR IGNORE INTO problems
-  (id, slug, statement, origin, target_group, region, category, consequence, author_id, source, proof_status, created_at)
+  (id, slug, title, statement, origin, target_group, region, category, consequence, author_id, source, proof_status, created_at)
 VALUES
-  (1, 'indie-hacker-repo-reflex', 'Solo-Entwickler starten bei neuen Ideen oft sofort Repos und Implementierung, bevor das Problem geklärt ist.', 'firsthand', 'Solo-Entwickler/Indie-Hacker', 'Deutschland', 'Softwareentwicklung', 'Über Monate oder Jahre entstehen viele angefangene Projekte, aber keine Veröffentlichung und kein Nutzertest.', 'seed-author-0', 'skill', 'needs-proof', '2026-07-21 09:00:00'),
-  (2, 'side-project-infrastruktur', 'Beim Start eines Side Projects verliere ich mehr Zeit mit Infrastruktur als mit dem Produkt.', 'firsthand', 'Entwickler', 'Berlin', 'Softwareentwicklung', 'Der eigentliche Nutzertest startet später oder das Projekt wird ganz aufgegeben.', 'seed-author-1', 'web', 'needs-proof', '2026-07-20 09:30:00'),
-  (3, 'schichtwechsel-patienteninfos', 'Schichtwechsel verlieren wichtige Patienteninfos, weil Übergaben über mehrere Kanäle verteilt sind.', 'hypothesis', 'Pflegekräfte', 'Europa', 'Gesundheit', 'Informationen müssen rekonstruiert werden und können bei der nächsten Schicht fehlen.', 'seed-author-2', 'web', 'needs-proof', '2026-07-19 16:10:00'),
-  (4, 'handwerker-angebotserstellung', 'Kleine Handwerksbetriebe schreiben Angebote abends, weil Maße, Fotos und Preise tagsüber getrennt erfasst werden.', 'firsthand', 'Handwerksbetriebe', 'Deutschland', 'Handwerk', 'Angebote kommen verspätet beim Kunden an und private Zeit geht verloren.', 'seed-author-3', 'web', 'strong', '2026-07-18 11:00:00');
+  (1, 'indie-hacker-repo-reflex', 'Repo-Reflex vor Problemklärung', 'Solo-Entwickler starten bei neuen Ideen oft sofort Repos und Implementierung, bevor das Problem geklärt ist.', 'firsthand', 'Solo-Entwickler/Indie-Hacker', 'Deutschland', 'Softwareentwicklung', 'Über Monate oder Jahre entstehen viele angefangene Projekte, aber keine Veröffentlichung und kein Nutzertest.', 'seed-author-0', 'skill', 'needs-proof', '2026-07-21 09:00:00'),
+  (2, 'side-project-infrastruktur', 'Infrastruktur frisst Side-Project-Zeit', 'Beim Start eines Side Projects verliere ich mehr Zeit mit Infrastruktur als mit dem Produkt.', 'firsthand', 'Entwickler', 'Berlin', 'Softwareentwicklung', 'Der eigentliche Nutzertest startet später oder das Projekt wird ganz aufgegeben.', 'seed-author-1', 'web', 'needs-proof', '2026-07-20 09:30:00'),
+  (3, 'schichtwechsel-patienteninfos', 'Patienteninfos zerfallen beim Schichtwechsel', 'Schichtwechsel verlieren wichtige Patienteninfos, weil Übergaben über mehrere Kanäle verteilt sind.', 'hypothesis', 'Pflegekräfte', 'Europa', 'Gesundheit', 'Informationen müssen rekonstruiert werden und können bei der nächsten Schicht fehlen.', 'seed-author-2', 'web', 'needs-proof', '2026-07-19 16:10:00'),
+  (4, 'handwerker-angebotserstellung', 'Angebote entstehen erst nach Feierabend', 'Kleine Handwerksbetriebe schreiben Angebote abends, weil Maße, Fotos und Preise tagsüber getrennt erfasst werden.', 'firsthand', 'Handwerksbetriebe', 'Deutschland', 'Handwerk', 'Angebote kommen verspätet beim Kunden an und private Zeit geht verloren.', 'seed-author-3', 'web', 'strong', '2026-07-18 11:00:00');
 
 WITH RECURSIVE counter(n) AS (
   SELECT 1

@@ -57,6 +57,19 @@ async function post(url: string, payload: Record<string, unknown>) {
   return data;
 }
 
+async function trackProblemEvent(problemId: string, eventType: 'view' | 'share', source = '') {
+  try {
+    await fetch(`/api/problems/${problemId}/events`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ eventType, source }),
+      keepalive: true,
+    });
+  } catch {
+    // Tracking must never block the validation flow.
+  }
+}
+
 function authMessage(error: unknown) {
   const data = (error as { data?: Record<string, unknown> }).data ?? {};
   if (data.error === 'Bitte melde dich mit GitHub an.') return 'Bitte melde dich mit GitHub an.';
@@ -187,18 +200,33 @@ $$<HTMLButtonElement>('[data-action="favorite"]').forEach((button) => button.add
 
 $$<HTMLButtonElement>('[data-action="share"]').forEach((button) => button.addEventListener('click', async () => {
   const card = button.closest<HTMLElement>('.problem');
-  const statementText = $<HTMLElement>('h2', card ?? document)?.textContent?.trim() ?? 'Problem auf ProblemProof';
-  const shareData = { title: 'ProblemProof', text: statementText, url: window.location.href };
+  const problemId = card?.dataset.problemId;
+  const problemPath = card?.dataset.problemUrl ?? window.location.pathname;
+  const problemUrl = new URL(problemPath, window.location.origin).toString();
+  const titleText = $<HTMLElement>('h2', card ?? document)?.textContent?.trim() ?? 'Problem auf ProblemProof';
+  const statementText = $<HTMLElement>('.problem-statement', card ?? document)?.textContent?.trim() ?? titleText;
+  const shareData = { title: titleText, text: statementText, url: problemUrl };
   try {
+    if (problemId) void trackProblemEvent(problemId, 'share', 'web-share');
     if (navigator.share) await navigator.share(shareData);
     else {
-      await navigator.clipboard.writeText(`${statementText} ${window.location.href}`);
+      await navigator.clipboard.writeText(`${titleText}: ${statementText} ${problemUrl}`);
       showToast('Link kopiert.');
     }
   } catch (error) {
     if ((error as Error).name !== 'AbortError') showToast('Teilen hat nicht funktioniert.');
   }
 }));
+
+$$<HTMLAnchorElement>('[data-action="share-linkedin"]').forEach((link) => link.addEventListener('click', () => {
+  const problemId = link.dataset.problemId;
+  if (problemId) void trackProblemEvent(problemId, 'share', 'linkedin');
+}));
+
+const trackedProblemId = document.body.dataset.trackProblemId;
+if (trackedProblemId) {
+  window.setTimeout(() => void trackProblemEvent(trackedProblemId, 'view'), 350);
+}
 
 $$<HTMLSelectElement>('[data-filter-form] select').forEach((select) => select.addEventListener('change', () => {
   (select.form as HTMLFormElement).requestSubmit();

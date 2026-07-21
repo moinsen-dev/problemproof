@@ -2,6 +2,7 @@
 import { env } from 'cloudflare:workers';
 import SiteFooter from '../components/SiteFooter.astro';
 import { authConfig, currentUser } from '../lib/auth';
+import { validationLabel } from '../lib/problems';
 import '../styles/global.css';
 
 const user = await currentUser(Astro.request, env.DB, env);
@@ -14,6 +15,35 @@ const tokens = user ? await env.DB.prepare(`
   ORDER BY created_at DESC
   LIMIT 20
 `).bind(user.id).all<{ name: string; created_at: string; last_used_at: string | null; revoked_at: string | null }>() : null;
+const myProblems = user ? await env.DB.prepare(`
+  SELECT
+    p.id, p.slug, p.title, p.statement, p.target_group, p.region, p.category, p.proof_status, p.created_at,
+    COUNT(DISTINCT c.id) AS confirmations_count,
+    COUNT(DISTINCT e.id) AS incidents_count,
+    (SELECT COUNT(*) FROM problem_events ev WHERE ev.problem_id = p.id AND ev.event_type = 'view') AS views_count,
+    (SELECT COUNT(*) FROM problem_events ev WHERE ev.problem_id = p.id AND ev.event_type = 'share') AS shares_count
+  FROM problems p
+  LEFT JOIN confirmations c ON c.problem_id = p.id
+  LEFT JOIN evidence e ON e.problem_id = p.id
+  WHERE p.user_id = ?
+  GROUP BY p.id
+  ORDER BY p.created_at DESC
+  LIMIT 50
+`).bind(user.id).all<{
+  id: number;
+  slug: string;
+  title: string;
+  statement: string;
+  target_group: string;
+  region: string;
+  category: string;
+  proof_status: 'needs-proof' | 'strong';
+  created_at: string;
+  confirmations_count: number;
+  incidents_count: number;
+  views_count: number;
+  shares_count: number;
+}>() : null;
 ---
 
 <!doctype html>
@@ -44,6 +74,26 @@ const tokens = user ? await env.DB.prepare(`
         <section class="account-panel">
           <h2>{user.displayName}</h2>
           <p>Öffentlich erscheint keine Voterliste und kein GitHub-Profil. ProblemProof nutzt den Account, um doppelte Interaktionen zu verhindern.</p>
+
+          <h2>Meine Probleme</h2>
+          <div class="creator-problems">
+            {(myProblems?.results ?? []).length ? myProblems?.results.map((problem) => (
+              <article class="creator-problem">
+                <div>
+                  <span class="validation-pill">{validationLabel(problem)}</span>
+                  <h3><a href={`/problems/${problem.slug}`}>{problem.title}</a></h3>
+                  <p>{problem.statement}</p>
+                  <small>{problem.target_group} · {problem.region} · {problem.category}</small>
+                </div>
+                <dl class="creator-metrics">
+                  <div><dt>Views</dt><dd>{problem.views_count}</dd></div>
+                  <div><dt>Shares</dt><dd>{problem.shares_count}</dd></div>
+                  <div><dt>Bestätigt</dt><dd>{problem.confirmations_count}</dd></div>
+                  <div><dt>Vorfälle</dt><dd>{problem.incidents_count}</dd></div>
+                </dl>
+              </article>
+            )) : <p>Noch keine eigenen Probleme. Poste ein Problem aus dem Feed oder per Skill.</p>}
+          </div>
 
           <form class="token-form" data-token-form>
             <label class="field">

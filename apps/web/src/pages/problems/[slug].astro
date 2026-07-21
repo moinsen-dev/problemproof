@@ -1,0 +1,126 @@
+---
+import { env } from 'cloudflare:workers';
+import EvidenceDialog from '../../components/EvidenceDialog.astro';
+import ProblemCard from '../../components/ProblemCard.astro';
+import PublishDialog from '../../components/PublishDialog.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import { authConfig, currentUser } from '../../lib/auth';
+import { getProblemByIdentifier, problemUrl, validationChecks, validationLabel } from '../../lib/problems';
+import '../../styles/global.css';
+
+const user = await currentUser(Astro.request, env.DB, env);
+const authReady = authConfig(env).enabled;
+const problem = await getProblemByIdentifier(env.DB, Astro.params.slug ?? '', user?.id ?? null);
+if (!problem) Astro.response.status = 404;
+const canonicalUrl = problem ? problemUrl(problem, Astro.url.origin) : `${Astro.url.origin}/`;
+const linkedInUrl = problem ? `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonicalUrl)}` : '';
+const loginUrl = `/auth/github?returnTo=${encodeURIComponent(Astro.url.pathname)}`;
+const checks = problem ? validationChecks(problem) : [];
+const ogTitle = problem ? `${problem.title} – ProblemProof` : 'Problem nicht gefunden – ProblemProof';
+const ogDescription = problem?.statement ?? 'Dieses Problem wurde nicht gefunden.';
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={ogDescription} />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={ogTitle} />
+    <meta property="og:description" content={ogDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={ogTitle} />
+    <meta name="twitter:description" content={ogDescription} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta name="theme-color" content="#ffffff" />
+    <title>{ogTitle}</title>
+  </head>
+  <body data-track-problem-id={problem?.id}>
+    <header class="site-header legal-header">
+      <a class="brand" href="/" aria-label="ProblemProof Startseite">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span>ProblemProof</span>
+      </a>
+      <div class="account-box" data-authenticated={user ? 'true' : 'false'}>
+        {user ? (
+          <>
+            <a class="account-link" href="/account/">{user.displayName}</a>
+            <form method="post" action="/auth/logout"><button class="plain-link" type="submit">Logout</button></form>
+          </>
+        ) : authReady ? (
+          <a class="button secondary sign-in" href={loginUrl}>GitHub Login</a>
+        ) : (
+          <span class="auth-offline">Login bald aktiv</span>
+        )}
+      </div>
+    </header>
+
+    <main class="problem-detail-main">
+      {problem ? (
+        <>
+          <section class="detail-hero">
+            <p class="section-kicker">Öffentliches Problem</p>
+            <h1>{problem.title}</h1>
+            <p>{problem.statement}</p>
+            <div class="detail-actions">
+              <button class="button primary" type="button" data-open-publish>Eigenes Problem posten</button>
+              <a
+                class="button secondary"
+                href={linkedInUrl}
+                target="_blank"
+                rel="noopener"
+                data-action="share-linkedin"
+                data-problem-id={problem.id}
+              >
+                Auf LinkedIn teilen
+              </a>
+            </div>
+          </section>
+
+          <section class="detail-grid">
+            <div>
+              <ProblemCard problem={problem} position={0} />
+            </div>
+            <aside class="validation-panel" aria-label="Validierungsstand">
+              <p class="section-kicker">Validierungsstand</p>
+              <h2>{validationLabel(problem)}</h2>
+              <dl class="metric-list">
+                <div><dt>Views</dt><dd>{problem.views_count}</dd></div>
+                <div><dt>Shares</dt><dd>{problem.shares_count}</dd></div>
+                <div><dt>Bestätigungen</dt><dd>{problem.confirmations_count}</dd></div>
+                <div><dt>Vorfälle</dt><dd>{problem.incidents_count}</dd></div>
+              </dl>
+              <ul class="validation-checks">
+                {checks.map((check) => (
+                  <li class={`check-${check.status}`}>
+                    <span aria-hidden="true">{check.status === 'passed' ? '✓' : check.status === 'partial' ? '◐' : '✗'}</span>
+                    <div>
+                      <strong>{check.label}</strong>
+                      <small>{check.detail}</small>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <p class="privacy-note">ProblemProof zeigt aggregierte Signale. Keine Voterliste, keine GitHub-Profile, kein Fingerprinting.</p>
+            </aside>
+          </section>
+        </>
+      ) : (
+        <section class="empty-state detail-empty">
+          <p class="section-kicker">404</p>
+          <h1>Problem nicht gefunden</h1>
+          <p>Der Link zeigt auf kein öffentliches Problem.</p>
+          <a class="button primary" href="/">Zurück zum Feed</a>
+        </section>
+      )}
+    </main>
+
+    <SiteFooter />
+    <PublishDialog />
+    <EvidenceDialog />
+    <div class="toast" role="status" aria-live="polite"></div>
+    <script src="../../scripts/app.ts"></script>
+  </body>
+</html>

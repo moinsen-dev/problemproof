@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { bearerUser, currentUser } from '../../../lib/auth';
 import { json, readJson, requestError } from '../../../lib/http';
-import { getProblems } from '../../../lib/problems';
+import { getProblems, problemUrl } from '../../../lib/problems';
 import type { FeedFilters, Origin } from '../../../lib/types';
 import { parseProblemInput, slugify } from '../../../lib/validation';
 
@@ -20,7 +20,7 @@ export const GET: APIRoute = async ({ url }) => {
   return json({ problems: await getProblems(env.DB, filters) });
 };
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, url }) => {
   try {
     const user = await currentUser(request, env.DB, env) ?? await bearerUser(request, env.DB, env);
     if (!user) return json({ error: 'Bitte melde dich mit GitHub an.' }, { status: 401 });
@@ -30,13 +30,14 @@ export const POST: APIRoute = async ({ request }) => {
     const parsed = parseProblemInput(body);
     if (!parsed.data) return json({ errors: parsed.errors }, { status: 422 });
     const input = parsed.data;
-    const slug = `${slugify(input.statement)}-${crypto.randomUUID().slice(0, 8)}`;
+    const slug = `${slugify(input.title)}-${crypto.randomUUID().slice(0, 8)}`;
     const result = await env.DB.prepare(`
       INSERT INTO problems
-        (slug, statement, origin, target_group, region, category, consequence, author_id, source, user_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (slug, title, statement, origin, target_group, region, category, consequence, author_id, source, user_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       slug,
+      input.title,
       input.statement,
       input.origin,
       input.targetGroup,
@@ -47,7 +48,12 @@ export const POST: APIRoute = async ({ request }) => {
       input.source,
       user.id,
     ).run();
-    return json({ id: result.meta.last_row_id, slug }, { status: 201 });
+    return json({
+      id: result.meta.last_row_id,
+      slug,
+      title: input.title,
+      url: problemUrl({ slug }, url.origin),
+    }, { status: 201 });
   } catch (error) {
     console.error('create problem failed', error);
     return requestError(error);

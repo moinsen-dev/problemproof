@@ -1,6 +1,6 @@
 ---
 name: problemproof
-description: Evidence-gated problem validation, Lean Startup validated-learning experiment design, and opportunity shaping for product, software, service, and non-software ideas. Use when a user wants to capture, park, validate, challenge, score, compare, research, formulate value/growth hypotheses, design a minimum viable learning experiment or MVP, run a Build-Measure-Learn loop, decide whether to build an idea, distinguish a personal tool from a market product, run a pre-repository gate before creating a repo, PRD, project scaffold, or implementation, or shape a sufficiently validated problem into a focused opportunity.
+description: Evidence-gated problem validation, Lean Startup validated-learning experiment design, Lean sparring-partner critique, and opportunity shaping for product, software, service, and non-software ideas. Use when a user wants to capture, park, validate, challenge, score, compare, research, formulate value/growth hypotheses, design a minimum viable learning experiment or MVP, run a Build-Measure-Learn loop, get a tough Lean-method sparring critique before building, decide whether to build an idea, distinguish a personal tool from a market product, run a pre-repository gate before creating a repo, PRD, project scaffold, or implementation, or shape a sufficiently validated problem into a focused opportunity.
 ---
 
 # ProblemProof
@@ -23,6 +23,7 @@ Interpret `$problemproof <intent>` and equivalent natural language. Use these in
 - `hypotheses`: Formulate value and growth hypotheses, plus the riskiest assumption, while keeping the problem gate visible.
 - `mvp`: Design the smallest minimum viable learning artifact, not a full product, to test one critical assumption.
 - `loop`: Plan a Build-Measure-Learn cycle with metrics, thresholds, and a pivot/persevere decision.
+- `lean-sparring`: Run a tough Lean-method sparring partner critique that pressure-tests the problem gate, hypothesis quality, MVP choice, metrics, and decision thresholds. Treat `sparring`, `lean-coach`, and requests for an Eric Ries-style critique as this intent.
 - `score`: Produce the transparent 12-dimension scorecard.
 - `shape`: Run Opportunity Shaping only if the evidence gate has passed.
 - `compare`: Compare ideas by problem quality and evidence, never implementation excitement.
@@ -40,7 +41,8 @@ If the intent is ambiguous, capture the idea and ask one focused question that m
 ## Load the required guidance
 
 - Read `references/framework.md` completely before `validate`, `challenge`, `evidence`, `experiment`, `hypotheses`, `mvp`, `loop`, `score`, `compare`, `decision`, or `shape`.
-- Read `references/lean-startup.md` completely before `experiment`, `hypotheses`, `mvp`, or `loop`.
+- Read `references/lean-startup.md` completely before `experiment`, `hypotheses`, `mvp`, `loop`, or `lean-sparring`.
+- Read `references/lean-sparring-partner.md` completely before `lean-sparring`, `sparring`, `lean-coach`, or any request for an Eric Ries-style critique.
 - Read `references/artifact-contract.md` completely before creating or updating persistent artifacts.
 - Read `references/report-templates.md` completely before producing a full validation or opportunity-shaping report.
 
@@ -58,6 +60,7 @@ If the intent is ambiguous, capture the idea and ask one focused question that m
 - Do not recommend a full application as the first experiment.
 - Treat an MVP as a learning instrument, not the first version of a product.
 - Do not run Lean Startup theater: every MVP or loop must name the hypothesis, metric, threshold, and decision it can change.
+- Do not impersonate Eric Ries or any public figure. Use a Lean Startup / Validated Learning sparring posture and label it as method-inspired critique.
 - Do not publish anything publicly without explicit user confirmation in the current conversation.
 - Do not create a repository, PRD, project scaffold, or implementation for a new idea until the repo-start gate has run and a ProblemProof decision is recorded.
 - Define stop, narrow, or reframe criteria before running an experiment.
@@ -102,6 +105,34 @@ Use this layer to clarify or test the evidence gate before shaping. Do not let v
 8. End with a decision rule: stop, narrow, reframe, pivot, persevere with another experiment, or proceed to opportunity shaping if the evidence gate passes.
 
 If the requested MVP would require a full app, reduce it to a fake door, landing page, concierge/manual service, prototype of one adoption-critical behavior, or paid commitment test unless the user explicitly classifies the work as personal or learning.
+
+## Run Lean Sparring Partner
+
+Use `lean-sparring` when the user wants a virtual sparring partner, a tough Lean critique, or an Eric Ries-style challenge. Do not claim to be Eric Ries. Say that the critique uses Lean Startup / Validated Learning methods.
+
+1. Start from a solution-free problem statement. If none exists, extract it before critiquing the solution.
+2. State the current ProblemProof gate status and the one unresolved item most likely to make building premature.
+3. Identify the weakest assumption in the user's current reasoning, not the most interesting feature idea.
+4. Challenge vanity metrics, fake MVPs, vague target groups, channel handwaving, and thresholds that cannot change a decision.
+5. Ask one hard question at a time when the user is still exploring. Produce the full sparring report only when the user asks for a plan, critique, or next step.
+6. Translate the critique into the cheapest decisive experiment with a primary actionable metric and precommitted stop/narrow/pivot/persevere thresholds.
+7. End with what evidence would make the answer `no`, not only what would justify continuing.
+
+Use this compact output shape unless a fuller report is requested:
+
+```text
+Lean sparring stance:
+Problem gate status:
+Toughest objection:
+Decisive question:
+Riskiest assumption:
+Anti-vanity metric:
+Minimum decisive experiment:
+Decision threshold:
+What would make this a no:
+```
+
+When persistence is in scope, update `hypotheses.md`, `experiments.md`, and `history.md` with the sparring result and link each decision to evidence or assumptions.
 
 ## Run Opportunity Shaping
 

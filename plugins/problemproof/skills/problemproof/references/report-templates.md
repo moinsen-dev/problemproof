@@ -182,6 +182,7 @@ Precommit to stop, narrow, reframe, pivot, persevere with the next assumption, o
 - `hypotheses`: value hypothesis, growth hypothesis, riskiest assumption, current gate state, and evidence needed next.
 - `mvp`: minimum viable learning artifact, build scope, explicit non-goals, metric contract, and stop/pivot/persevere thresholds.
 - `loop`: Build-Measure-Learn plan, innovative-accounting baseline, thresholds, learning decision, and artifact updates.
+- `lean-sparring`: method-inspired sparring stance, problem gate status, toughest objection, decisive question, riskiest assumption, anti-vanity metric, minimum decisive experiment, thresholds, stop/narrow/pivot/persevere rule, and what would make this a no.
 - `score`: the complete scorecard plus decisive unknowns; no total.
 - `compare`: side-by-side dimensions, evidence quality, fatal unknowns, and recommended next test for each idea; no winner by total score.
 - `park`: capture summary, reason parked, cooling-off date, reassessment trigger, and no implied build commitment.

@@ -23,7 +23,12 @@ npx skills add moinsen-dev/problemproof --skill problemproof
 
 Danach kann ein Problem beispielsweise mit `$problemproof capture`,
 `$problemproof validate`, `$problemproof hypotheses`, `$problemproof mvp`,
-`$problemproof loop` oder `$problemproof experiment` bearbeitet werden.
+`$problemproof loop`, `$problemproof lean-sparring` oder
+`$problemproof experiment` bearbeitet werden.
+
+`$problemproof lean-sparring` nutzt eine Lean-Startup/Validated-Learning-Linse
+als methodischen Sparringspartner: problem-first, mit harter Annahmenprüfung,
+Anti-Vanity-Metriken und klaren Stop-/Pivot-/Persevere-Schwellen.
 
 ## Transparenz und Vertrauen
 

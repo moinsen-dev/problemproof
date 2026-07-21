@@ -15,6 +15,11 @@ worker-configuration.d.ts
 *.key
 *.log
 
+# Local agent and skill installations
+.agents/
+.claude/
+skills-lock.json
+
 # Python and editor output
 __pycache__/
 *.py[cod]

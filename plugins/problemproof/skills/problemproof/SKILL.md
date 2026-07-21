@@ -1,6 +1,6 @@
 ---
 name: problemproof
-description: Evidence-gated problem validation and opportunity shaping for product, software, service, and non-software ideas. Use when a user wants to capture, park, validate, challenge, score, compare, research, or decide whether to build an idea; design a cheap demand experiment; distinguish a personal tool from a market product; or shape a sufficiently validated problem into a focused opportunity.
+description: Evidence-gated problem validation and opportunity shaping for product, software, service, and non-software ideas. Use when a user wants to capture, park, validate, challenge, score, compare, research, or decide whether to build an idea; design a cheap demand experiment; distinguish a personal tool from a market product; run a pre-repository gate before creating a repo, PRD, project scaffold, or implementation; or shape a sufficiently validated problem into a focused opportunity.
 ---
 
 # ProblemProof
@@ -15,6 +15,7 @@ Interpret `$problemproof <intent>` and equivalent natural language. Use these in
 
 - `capture`: Record an idea neutrally without evaluating or expanding it.
 - `add`: Create or update a local ProblemProof artifact workspace without publishing.
+- `repo-gate`: Create a local pre-repository gate before any repo, PRD, scaffold, or implementation work starts.
 - `validate`: Run Problem Validation and produce the complete report.
 - `challenge`: Make the strongest evidence-based case that the idea may fail.
 - `evidence`: Inventory supporting, contradicting, and missing evidence.
@@ -50,6 +51,7 @@ If the intent is ambiguous, capture the idea and ask one focused question that m
 - Summarize learned facts, live assumptions, and decisive unknowns after each conversational phase.
 - Do not recommend a full application as the first experiment.
 - Do not publish anything publicly without explicit user confirmation in the current conversation.
+- Do not create a repository, PRD, project scaffold, or implementation for a new idea until the repo-start gate has run and a ProblemProof decision is recorded.
 - Define stop, narrow, or reframe criteria before running an experiment.
 - Do not enter Opportunity Shaping automatically. A passing score is not an evidence gate.
 - Preserve prior assumptions and decisions. Mark them confirmed, rejected, or superseded; never silently rewrite history.
@@ -106,6 +108,27 @@ Then classify the work honestly and help scope it according to that classificati
 ## Persist artifacts safely
 
 For persistent work, use a `problem-proof/` directory in the user's chosen location. If no repository exists, ask for or use the current working directory only when that is clearly acceptable.
+
+## Run the repo-start gate
+
+When the user asks to start a new repository, create a GitHub repo, write a PRD, scaffold an app, or begin implementation from an unvalidated idea, pause implementation and run `repo-gate` first. Treat this as a stop-loss checkpoint, not as product validation theater.
+
+Run:
+
+```bash
+python3 <this-skill-dir>/scripts/problemproof_workspace.py repo-gate \
+  --root <chosen-parent-directory> \
+  --title "<idea title>"
+```
+
+Then ask for or produce the minimum ProblemProof decision before building:
+
+- `personal`: Build deliberately for personal value or learning.
+- `park`: Cool off and revisit later.
+- `validate-before-building`: Run the smallest evidence-producing action first.
+- `stop`: Do not build.
+
+If the user explicitly says the work is a deliberate personal build, do not force market validation. Still keep the gate record so the decision is visible later.
 
 Initialize with:
 

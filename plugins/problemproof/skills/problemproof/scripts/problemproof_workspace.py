@@ -150,6 +150,11 @@ def validate_project_dir_name(value: str) -> str:
     return value
 
 
+def slug_directory(value: str) -> str:
+    normalized = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    return (normalized or "idea")[:48].strip("-") or "idea"
+
+
 def write_new_text(path: Path, content: str) -> bool:
     try:
         with path.open("x", encoding="utf-8", newline="\n") as handle:
@@ -625,6 +630,30 @@ def command_publish(args: argparse.Namespace) -> None:
     print(f"Published problem {result.get('id')} ({result.get('slug')})")
 
 
+def command_repo_gate(args: argparse.Namespace) -> None:
+    title = single_line(args.title, "title", maximum=200)
+    directory_name = args.project_dir or f"problem-proof-{slug_directory(title)}"
+    init_args = argparse.Namespace(
+        root=args.root,
+        project_dir=directory_name,
+        title=title,
+        cooling_off_hours=args.cooling_off_hours,
+    )
+    command_init(init_args)
+    project = Path(args.root).expanduser().resolve() / directory_name
+    append_history(
+        project,
+        "repo-start-gate",
+        "Repo creation, project scaffolding, PRD generation, and build implementation "
+        "are blocked until a ProblemProof decision is recorded.",
+    )
+    print("")
+    print("Repo-start gate active.")
+    print(f"Project: {project}")
+    print("Do not create a repository, scaffold files, or start implementation yet.")
+    print("Next decision: personal build, park, validate before building, or stop.")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Manage a non-destructive ProblemProof artifact workspace."
@@ -646,6 +675,15 @@ def build_parser() -> argparse.ArgumentParser:
     add_parser.add_argument("--title", required=True)
     add_parser.add_argument("--cooling-off-hours", type=int, default=72)
     add_parser.set_defaults(handler=command_init)
+
+    repo_gate_parser = subparsers.add_parser(
+        "repo-gate", help="create a pre-repository ProblemProof gate"
+    )
+    repo_gate_parser.add_argument("--root", required=True, help="parent directory")
+    repo_gate_parser.add_argument("--project-dir")
+    repo_gate_parser.add_argument("--title", required=True)
+    repo_gate_parser.add_argument("--cooling-off-hours", type=int, default=72)
+    repo_gate_parser.set_defaults(handler=command_repo_gate)
 
     check_parser = subparsers.add_parser("check", help="validate workspace integrity")
     check_parser.add_argument("--project", required=True)

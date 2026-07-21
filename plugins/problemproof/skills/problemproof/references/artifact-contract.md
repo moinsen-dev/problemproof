@@ -52,6 +52,16 @@ python3 <skill-dir>/scripts/problemproof_workspace.py add \
   --cooling-off-hours 72
 ```
 
+Use `repo-gate` before creating a repository, PRD, project scaffold, or implementation for a new idea:
+
+```bash
+python3 <skill-dir>/scripts/problemproof_workspace.py repo-gate \
+  --root <chosen-parent-directory> \
+  --title "<idea title>"
+```
+
+If `--project-dir` is omitted, `repo-gate` creates `problem-proof-<title-slug>/` so multiple pre-repo records can live under one parent. The command does not publish anything and prints a build-stop reminder.
+
 The command creates `<chosen-parent-directory>/problem-proof/` by default. Use `--project-dir <single-directory-name>` to keep multiple ideas under one parent. Do not use paths containing `/`, `..`, or an absolute path as `--project-dir`.
 
 Check structure and state integrity:

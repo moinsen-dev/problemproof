@@ -92,6 +92,23 @@ class WorkspaceScriptTests(unittest.TestCase):
         )
         self.assertIn("publish requires --yes", result.stderr)
 
+    def test_repo_gate_creates_unique_pre_repo_record(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            result = self.run_script(
+                "repo-gate",
+                "--root",
+                directory,
+                "--title",
+                "Repo reflex stop loss",
+            )
+            project = Path(directory) / "problem-proof-repo-reflex-stop-loss"
+            self.assertTrue((project / "state.json").is_file())
+            self.assertIn("Repo-start gate active", result.stdout)
+            self.assertIn("Do not create a repository", result.stdout)
+            history = (project / "history.md").read_text(encoding="utf-8")
+            self.assertIn("repo-start-gate", history)
+            self.run_script("check", "--project", str(project))
+
     def test_gate_blocks_premature_shaping(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = self.initialize(Path(directory))

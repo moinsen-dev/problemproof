@@ -90,13 +90,18 @@ import LegalLayout from '../layouts/LegalLayout.astro';
   </section>
 
   <section>
-    <h2>6. Views, Shares und Referrer</h2>
+    <h2>6. Views, Shares und Proof-Reaktionen</h2>
     <p>
       Auf Problem-Detailseiten erfassen wir aggregierbare Ereignisse wie „View“ und „Share“, damit Creator
       sehen können, ob ein geteiltes Problem Resonanz bekommt. Gespeichert werden Problem-ID, Ereignistyp,
       Datum, eine grobe Quelle wie „LinkedIn“, „GitHub“, „direkt“ oder „extern“ sowie bei eingeloggten
       Nutzern optional die interne Account-ID. Wir speichern dafür keine IP-Adresse, keinen User-Agent und
       erstellen kein Fingerprinting-Profil.
+    </p>
+    <p>
+      Im mobilen Proof Feed speichern wir bei eingeloggten Nutzern außerdem pro Problem höchstens eine
+      Reaktion wie „Ja, habe ich“, „Nicht mein Problem“ oder „übersprungen“. Öffentlich und über die API
+      erscheinen daraus nur aggregierte Zähler; keine Voterliste und keine GitHub-Profile.
     </p>
     <p>
       Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Unser berechtigtes Interesse ist, die Validierung von
@@ -134,7 +139,7 @@ import LegalLayout from '../layouts/LegalLayout.astro';
   <section>
     <h2>9. Speicherdauer</h2>
     <p>
-      Veröffentlichte Probleme, Bestätigungen und Vorfälle bleiben gespeichert, solange sie für die
+      Veröffentlichte Probleme, Bestätigungen, Proof-Reaktionen und Vorfälle bleiben gespeichert, solange sie für die
       Problem-Datenbank und ihre Auswertung benötigt werden oder bis einer berechtigten Löschanfrage
       entsprochen wird. Eine feste automatische Löschfrist besteht derzeit nicht. Daten können länger
       gespeichert werden, wenn gesetzliche Pflichten oder die Verteidigung von Rechtsansprüchen dies erfordern.

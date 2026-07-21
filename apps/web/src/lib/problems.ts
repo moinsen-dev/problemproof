@@ -11,6 +11,8 @@ const SELECT_PROBLEMS = `
     GROUP_CONCAT(DISTINCT NULLIF(e.workaround, '')) AS workarounds,
     (SELECT COUNT(*) FROM problem_events ev WHERE ev.problem_id = p.id AND ev.event_type = 'view') AS views_count,
     (SELECT COUNT(*) FROM problem_events ev WHERE ev.problem_id = p.id AND ev.event_type = 'share') AS shares_count,
+    (SELECT COUNT(*) FROM proof_reactions pr WHERE pr.problem_id = p.id AND pr.reaction_type = 'not_my_problem') AS not_my_problem_count,
+    (SELECT COUNT(*) FROM proof_reactions pr WHERE pr.problem_id = p.id AND pr.reaction_type = 'skip') AS skips_count,
     CASE WHEN ? IS NOT NULL AND EXISTS (
       SELECT 1 FROM favorites f WHERE f.problem_id = p.id AND f.user_id = ?
     ) THEN 1 ELSE 0 END AS is_favorite,
@@ -19,14 +21,17 @@ const SELECT_PROBLEMS = `
     ) THEN 1 ELSE 0 END AS user_confirmed,
     CASE WHEN ? IS NOT NULL AND EXISTS (
       SELECT 1 FROM evidence ue WHERE ue.problem_id = p.id AND ue.user_id = ?
-    ) THEN 1 ELSE 0 END AS user_incident
+    ) THEN 1 ELSE 0 END AS user_incident,
+    CASE WHEN ? IS NOT NULL THEN (
+      SELECT reaction_type FROM proof_reactions ur WHERE ur.problem_id = p.id AND ur.user_id = ? LIMIT 1
+    ) ELSE NULL END AS user_proof_reaction
   FROM problems p
   LEFT JOIN confirmations c ON c.problem_id = p.id
   LEFT JOIN evidence e ON e.problem_id = p.id`;
 
 export async function getProblems(db: D1Database, filters: FeedFilters, userId: number | null = null): Promise<ProblemRow[]> {
   const where: string[] = [];
-  const values: unknown[] = [userId, userId, userId, userId, userId, userId];
+  const values: unknown[] = [userId, userId, userId, userId, userId, userId, userId, userId];
   if (filters.mode === 'needs-proof') where.push("p.proof_status = 'needs-proof'");
   if (filters.mode === 'strong') where.push("p.proof_status = 'strong'");
   if (filters.mode === 'favorites') where.push('p.id IN (SELECT problem_id FROM favorites WHERE user_id = ?)');
@@ -67,7 +72,7 @@ export async function getProblemByIdentifier(db: D1Database, identifier: string,
     WHERE ${where}
     GROUP BY p.id
     LIMIT 1
-  `).bind(userId, userId, userId, userId, userId, userId, value).first<ProblemRow>();
+  `).bind(userId, userId, userId, userId, userId, userId, userId, userId, value).first<ProblemRow>();
   return result ?? null;
 }
 

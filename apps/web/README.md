@@ -14,6 +14,7 @@ Astro-Seite
   ├─ GET /api/problems/:id-or-slug einzelnes Problem mit privaten User-States
   ├─ POST /api/problems/:id/events privacy-freundliche View/Share Events
   ├─ POST /api/problems/:id/signal
+  ├─ POST /api/problems/:id/reaction
   ├─ POST /api/problems/:id/evidence
   ├─ POST/DELETE /api/problems/:id/favorite
   ├─ GET /auth/github             GitHub OAuth start
@@ -31,10 +32,11 @@ Astro-Seite
                        ├─ users / identities / sessions
                        ├─ favorites
                        ├─ personal_tokens
-                       └─ problem_events
+                       ├─ problem_events
+                       └─ proof_reactions
 ```
 
-Jedes Problem hat einen kurzen `title`, eine lösungsfreie `statement`-Beschreibung und eine eigene Detailseite unter `/problems/:slug`. `confirmations` und `evidence` speichern pro Problem und internem Account höchstens einen Datensatz. Legacy-Daten mit anonymer Teilnehmer-ID bleiben lesbar. `problem_events` speichert nur aggregierbare View/Share-Signale ohne IP-Adressen, User-Agent-Fingerprinting oder rohe Viewerprofile.
+Jedes Problem hat einen kurzen `title`, eine lösungsfreie `statement`-Beschreibung und eine eigene Detailseite unter `/problems/:slug`. `confirmations` und `evidence` speichern pro Problem und internem Account höchstens einen Datensatz. `proof_reactions` trennt die mobilen Feed-Reaktionen `yes`, `not_my_problem` und `skip` pro User/Problem von reinen View/Share-Events. Legacy-Daten mit anonymer Teilnehmer-ID bleiben lesbar. `problem_events` speichert nur aggregierbare View/Share-Signale ohne IP-Adressen, User-Agent-Fingerprinting oder rohe Viewerprofile.
 
 ## GitHub Auth und Skill Tokens
 
@@ -101,6 +103,8 @@ Wrangler deployt den Worker `problemproof` auf die Custom Domain `problemproof.m
       "title": "Repo-Reflex vor Problemklärung",
       "statement": "…",
       "confirmations": 38,
+      "not_my_problem": 5,
+      "skips": 2,
       "incidents": 12,
       "average_severity": 3.5,
       "views": 120,

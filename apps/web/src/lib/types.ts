@@ -2,11 +2,13 @@ export const ORIGINS = ['firsthand', 'hypothesis'] as const;
 export const SOURCES = ['web', 'skill', 'api'] as const;
 export const HAPPENED_OPTIONS = ['7-days', '30-days', '90-days', 'older'] as const;
 export const FREQUENCIES = ['once', 'monthly', 'weekly', 'daily'] as const;
+export const PROOF_REACTIONS = ['yes', 'not_my_problem', 'skip'] as const;
 
 export type Origin = (typeof ORIGINS)[number];
 export type Source = (typeof SOURCES)[number];
 export type Happened = (typeof HAPPENED_OPTIONS)[number];
 export type Frequency = (typeof FREQUENCIES)[number];
+export type ProofReaction = (typeof PROOF_REACTIONS)[number];
 
 export interface ProblemRow {
   id: number;
@@ -27,9 +29,12 @@ export interface ProblemRow {
   workarounds: string | null;
   views_count: number;
   shares_count: number;
+  not_my_problem_count: number;
+  skips_count: number;
   is_favorite: 0 | 1;
   user_confirmed: 0 | 1;
   user_incident: 0 | 1;
+  user_proof_reaction: ProofReaction | null;
 }
 
 export interface FeedFilters {

@@ -21,7 +21,8 @@ const myProblems = user ? await env.DB.prepare(`
     COUNT(DISTINCT c.id) AS confirmations_count,
     COUNT(DISTINCT e.id) AS incidents_count,
     (SELECT COUNT(*) FROM problem_events ev WHERE ev.problem_id = p.id AND ev.event_type = 'view') AS views_count,
-    (SELECT COUNT(*) FROM problem_events ev WHERE ev.problem_id = p.id AND ev.event_type = 'share') AS shares_count
+    (SELECT COUNT(*) FROM problem_events ev WHERE ev.problem_id = p.id AND ev.event_type = 'share') AS shares_count,
+    (SELECT COUNT(*) FROM proof_reactions pr WHERE pr.problem_id = p.id AND pr.reaction_type = 'not_my_problem') AS not_my_problem_count
   FROM problems p
   LEFT JOIN confirmations c ON c.problem_id = p.id
   LEFT JOIN evidence e ON e.problem_id = p.id
@@ -43,6 +44,7 @@ const myProblems = user ? await env.DB.prepare(`
   incidents_count: number;
   views_count: number;
   shares_count: number;
+  not_my_problem_count: number;
 }>() : null;
 ---
 
@@ -89,6 +91,7 @@ const myProblems = user ? await env.DB.prepare(`
                   <div><dt>Views</dt><dd>{problem.views_count}</dd></div>
                   <div><dt>Shares</dt><dd>{problem.shares_count}</dd></div>
                   <div><dt>Bestätigt</dt><dd>{problem.confirmations_count}</dd></div>
+                  <div><dt>Nein</dt><dd>{problem.not_my_problem_count}</dd></div>
                   <div><dt>Vorfälle</dt><dd>{problem.incidents_count}</dd></div>
                 </dl>
               </article>

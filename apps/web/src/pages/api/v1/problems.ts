@@ -17,7 +17,9 @@ export const GET: APIRoute = async ({ url }) => {
       COUNT(DISTINCT e.id) AS incidents,
       ROUND(AVG(e.severity), 1) AS average_severity,
       (SELECT COUNT(*) FROM problem_events ev WHERE ev.problem_id = p.id AND ev.event_type = 'view') AS views,
-      (SELECT COUNT(*) FROM problem_events ev WHERE ev.problem_id = p.id AND ev.event_type = 'share') AS shares
+      (SELECT COUNT(*) FROM problem_events ev WHERE ev.problem_id = p.id AND ev.event_type = 'share') AS shares,
+      (SELECT COUNT(*) FROM proof_reactions pr WHERE pr.problem_id = p.id AND pr.reaction_type = 'not_my_problem') AS not_my_problem,
+      (SELECT COUNT(*) FROM proof_reactions pr WHERE pr.problem_id = p.id AND pr.reaction_type = 'skip') AS skips
     FROM problems p
     LEFT JOIN confirmations c ON c.problem_id = p.id
     LEFT JOIN evidence e ON e.problem_id = p.id

@@ -135,6 +135,8 @@ if (evidenceForm && evidenceDialog) {
       const confirmations = card && $<HTMLElement>('[data-count="confirmations"]', card);
       if (incidents && typeof result.incidents === 'number') incidents.textContent = String(result.incidents);
       if (confirmations && typeof result.confirmations === 'number') confirmations.textContent = String(result.confirmations);
+      const notMyProblem = card && $<HTMLElement>('[data-count="not-my-problem"]', card);
+      if (notMyProblem && typeof result.notMyProblem === 'number') notMyProblem.textContent = String(result.notMyProblem);
       evidenceDialog.close();
       evidenceForm.reset();
       severityOutput.textContent = '3';
@@ -222,10 +224,27 @@ function advanceProof(card: HTMLElement, className: string) {
   updateProofProgress();
 }
 
-$$<HTMLButtonElement>('[data-action="proof-no"]').forEach((button) => button.addEventListener('click', () => {
+$$<HTMLButtonElement>('[data-action="proof-no"]').forEach((button) => button.addEventListener('click', async () => {
   const card = button.closest<HTMLElement>('[data-proof-card]');
-  if (!card) return;
-  advanceProof(card, 'skipped');
+  const problemId = card?.dataset.problemId;
+  if (!card || !problemId || button.disabled) return;
+  if (button.dataset.localSkip === 'true') {
+    advanceProof(card, 'skipped');
+    return;
+  }
+  button.disabled = true;
+  try {
+    const result = await post(`/api/problems/${problemId}/reaction`, { reaction: 'not_my_problem', source: 'proof-feed' });
+    const target = $<HTMLElement>('[data-count="not-my-problem"]', card);
+    if (target && typeof result.notMyProblem === 'number') target.textContent = String(result.notMyProblem);
+    button.textContent = 'Gezählt';
+    showToast('Gezählt – nächstes Problem.');
+    window.setTimeout(() => advanceProof(card, 'skipped'), 220);
+  } catch (error) {
+    button.disabled = false;
+    const message = authMessage(error);
+    showToast(message || 'Reaktion konnte nicht gespeichert werden.');
+  }
 }));
 
 $$<HTMLButtonElement>('[data-action="proof-yes"]').forEach((button) => button.addEventListener('click', async () => {
@@ -236,7 +255,9 @@ $$<HTMLButtonElement>('[data-action="proof-yes"]').forEach((button) => button.ad
   try {
     const result = await post(`/api/problems/${problemId}/signal`, { participantId: getParticipantId(), region: '' });
     const target = $<HTMLElement>('[data-count="confirmations"]', card);
+    const notMyProblem = $<HTMLElement>('[data-count="not-my-problem"]', card);
     if (target && typeof result.confirmations === 'number') target.textContent = String(result.confirmations);
+    if (notMyProblem && typeof result.notMyProblem === 'number') notMyProblem.textContent = String(result.notMyProblem);
     button.textContent = 'Bestätigt';
     showToast('Bestätigt – nächstes Problem.');
     window.setTimeout(() => advanceProof(card, 'confirmed-card'), 220);

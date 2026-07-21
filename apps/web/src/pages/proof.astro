@@ -21,6 +21,11 @@ const allProblems = await getProblems(env.DB, filters, user?.id ?? null);
 const startIndex = Number.isInteger(startId) && startId > 0 ? allProblems.findIndex((problem) => problem.id === startId) : -1;
 const problems = startIndex > 0 ? [...allProblems.slice(startIndex), ...allProblems.slice(0, startIndex)] : allProblems;
 const loginUrl = `/auth/github?returnTo=${encodeURIComponent(`${Astro.url.pathname}${Astro.url.search}`)}`;
+
+function skipLabel(problem: (typeof problems)[number]) {
+  if (problem.user_confirmed || problem.user_proof_reaction === 'not_my_problem') return 'Weiter';
+  return 'Nicht mein Problem';
+}
 ---
 
 <!doctype html>
@@ -69,6 +74,7 @@ const loginUrl = `/auth/github?returnTo=${encodeURIComponent(`${Astro.url.pathna
               <p class="proof-consequence">{problem.consequence}</p>
               <dl class="proof-mini-metrics">
                 <div><dt>Ja</dt><dd data-count="confirmations">{problem.confirmations_count}</dd></div>
+                <div><dt>Nein</dt><dd data-count="not-my-problem">{problem.not_my_problem_count}</dd></div>
                 <div><dt>Vorfälle</dt><dd>{problem.incidents_count}</dd></div>
                 <div><dt>Shares</dt><dd>{problem.shares_count}</dd></div>
               </dl>
@@ -77,7 +83,14 @@ const loginUrl = `/auth/github?returnTo=${encodeURIComponent(`${Astro.url.pathna
                 <span>{problem.category}</span>
               </div>
               <div class="proof-actions">
-                <button class="proof-no" type="button" data-action="proof-no">Nicht mein Problem</button>
+                <button
+                  class="proof-no"
+                  type="button"
+                  data-action="proof-no"
+                  data-local-skip={problem.user_confirmed || problem.user_proof_reaction === 'not_my_problem' ? 'true' : undefined}
+                >
+                  {skipLabel(problem)}
+                </button>
                 <button class="proof-yes" type="button" data-action="proof-yes" disabled={Boolean(problem.user_confirmed)}>
                   {problem.user_confirmed ? 'Schon bestätigt' : 'Ja, habe ich'}
                 </button>

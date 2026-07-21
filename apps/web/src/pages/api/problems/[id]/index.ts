@@ -26,11 +26,14 @@ export const GET: APIRoute = async ({ params, request, url }) => {
     averageSeverity: problem.average_severity,
     views: problem.views_count,
     shares: problem.shares_count,
+    notMyProblem: problem.not_my_problem_count,
+    skips: problem.skips_count,
     url: problemUrl(problem, url.origin),
     userState: {
       favorite: Boolean(problem.is_favorite),
       confirmed: Boolean(problem.user_confirmed),
       incident: Boolean(problem.user_incident),
+      proofReaction: problem.user_proof_reaction,
     },
   });
 };

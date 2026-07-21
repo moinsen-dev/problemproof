@@ -18,10 +18,24 @@ export const POST: APIRoute = async ({ params, request }) => {
       INSERT OR IGNORE INTO confirmations (problem_id, participant_id, region, user_id)
       VALUES (?, ?, ?, ?)
     `).bind(problemId, participantId, region, user.id).run();
+    await env.DB.prepare(`
+      INSERT INTO proof_reactions (problem_id, user_id, reaction_type, source)
+      VALUES (?, ?, 'yes', 'confirmation')
+      ON CONFLICT(problem_id, user_id) DO UPDATE SET
+        reaction_type = 'yes',
+        source = 'confirmation',
+        updated_at = CURRENT_TIMESTAMP
+    `).bind(problemId, user.id).run();
     const count = await env.DB.prepare(`
-      SELECT COUNT(*) AS total FROM confirmations WHERE problem_id = ?
-    `).bind(problemId).first<{ total: number }>();
-    return json({ confirmations: count?.total ?? 0 });
+      SELECT
+        (SELECT COUNT(*) FROM confirmations WHERE problem_id = ?) AS confirmations,
+        (SELECT COUNT(*) FROM proof_reactions WHERE problem_id = ? AND reaction_type = 'not_my_problem') AS not_my_problem
+    `).bind(problemId, problemId).first<{ confirmations: number; not_my_problem: number }>();
+    return json({
+      confirmations: count?.confirmations ?? 0,
+      notMyProblem: count?.not_my_problem ?? 0,
+      reaction: 'yes',
+    });
   } catch (error) {
     console.error('confirm problem failed', error);
     return requestError(error);

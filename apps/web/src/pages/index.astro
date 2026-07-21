@@ -58,6 +58,54 @@ const tabUrl = (mode: FeedFilters['mode']) => {
         <p class="hero-copy">Formuliere es klar. Lass Menschen konkrete Vorfälle ergänzen. Entscheide mit Evidenz statt mit Bauchgefühl.</p>
       </section>
 
+      <section class="workflow" aria-labelledby="workflow-heading">
+        <div class="workflow-intro">
+          <p class="section-kicker">Skill + offene Validierung</p>
+          <h2 id="workflow-heading">So schließt ProblemProof den Kreis.</h2>
+          <p>
+            Der Skill hilft dabei, Ideen zuerst als Problem zu formulieren. Die Website macht diese Probleme öffentlich prüfbar:
+            Menschen bestätigen eigene Erfahrung, ergänzen Vorfälle und die API liefert nur aggregierte Signale zurück.
+          </p>
+        </div>
+
+        <div class="workflow-steps" aria-label="ProblemProof Ablauf">
+          <article>
+            <span>1</span>
+            <h3>Im Skill klären</h3>
+            <p>Problem, Zielgruppe, Evidenz und kritische Annahmen werden lokal getrennt: Fakt, Annahme, Hypothese, Unbekannt.</p>
+          </article>
+          <article>
+            <span>2</span>
+            <h3>Problem veröffentlichen</h3>
+            <p>Aus dem Skill oder direkt auf der Website landet nur die lösungsfreie Problemformulierung im öffentlichen Feed.</p>
+          </article>
+          <article>
+            <span>3</span>
+            <h3>Öffentlich prüfen</h3>
+            <p>Andere Menschen melden eigene Erfahrung oder konkrete Vorfälle. Eine Bestätigung ersetzt keine Evidenz.</p>
+          </article>
+          <article>
+            <span>4</span>
+            <h3>Mit Daten entscheiden</h3>
+            <p>Entwickler sehen, welche Probleme in welcher Zielgruppe und Region belastbare Signale bekommen.</p>
+          </article>
+        </div>
+
+        <div class="dogfood-panel">
+          <div>
+            <h3>Eat your own dog food.</h3>
+            <p>
+              ProblemProof validiert sich mit seinem eigenen Skill: Der Code ist öffentlich, der Skill liegt im selben Repository,
+              und der nächste Schritt ist die direkte Veröffentlichung per Skill nach expliziter Bestätigung.
+            </p>
+          </div>
+          <div class="install-box" aria-label="ProblemProof Skill installieren">
+            <code>npx skills add moinsen-dev/problemproof --skill problemproof</code>
+            <a href="https://github.com/moinsen-dev/problemproof" rel="external">Repository ansehen</a>
+          </div>
+        </div>
+      </section>
+
       <section class="feed-shell" aria-labelledby="feed-heading">
         <div class="feed-heading">
           <div>

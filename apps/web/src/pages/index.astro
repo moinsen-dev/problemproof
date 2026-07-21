@@ -116,14 +116,15 @@ const loginUrl = `/auth/github?returnTo=${encodeURIComponent(`${Astro.url.pathna
 
         <div class="dogfood-panel">
           <div>
-            <h3>Eat your own dog food.</h3>
+            <h3>ProblemProof als Skill installieren.</h3>
             <p>
-              ProblemProof validiert sich mit seinem eigenen Skill: Der Code ist öffentlich, der Skill liegt im selben Repository,
-              und der nächste Schritt ist die direkte Veröffentlichung per Skill nach expliziter Bestätigung.
+              Ein Kommando installiert die ProblemProof-Skills in Codex: Ideen als Probleme klären,
+              Lean-Sparring starten und nach expliziter Bestätigung direkt veröffentlichen. Der Code
+              und der Skill liegen offen im selben Repository.
             </p>
           </div>
           <div class="install-box" aria-label="ProblemProof Skill installieren">
-            <code>npx skills add moinsen-dev/problemproof --skill problemproof</code>
+            <code>npx skills add moinsen-dev/problemproof --skill '*' -a codex</code>
             <a href="https://github.com/moinsen-dev/problemproof" rel="external">Repository ansehen</a>
           </div>
         </div>

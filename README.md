@@ -18,7 +18,7 @@ Der ProblemProof-Skill funktioniert mit Codex und weiteren Agenten, die den
 offenen Agent-Skills-Standard unterstützen:
 
 ```bash
-npx skills add moinsen-dev/problemproof --skill problemproof
+npx skills add moinsen-dev/problemproof --skill '*' -a codex
 ```
 
 Danach kann ein Problem beispielsweise mit `$problemproof capture`,

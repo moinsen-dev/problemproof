@@ -151,6 +151,13 @@ Use `publish` only when the user explicitly confirms that a problem should be pu
 Run:
 
 ```bash
+python3 <this-skill-dir>/scripts/problemproof_workspace.py login \
+  --token "<personal ProblemProof token from /account/>"
+```
+
+Then publish with:
+
+```bash
 python3 <this-skill-dir>/scripts/problemproof_workspace.py publish \
   --statement "<solution-free problem>" \
   --origin firsthand \
@@ -158,9 +165,7 @@ python3 <this-skill-dir>/scripts/problemproof_workspace.py publish \
   --region "<region>" \
   --category "<category>" \
   --consequence "<observable consequence>" \
-  --participant-id "<stable local participant id>" \
-  --token "<personal ProblemProof token>" \
   --yes
 ```
 
-The default API target is `https://problemproof.moinsen.dev/api/problems`. Use `--api-url` for local or staging environments. Prefer `PROBLEMPROOF_TOKEN` over writing tokens into shell history.
+The default API target is `https://problemproof.moinsen.dev/api/problems`. Use `--api-url` for local or staging environments. Prefer `login` or `PROBLEMPROOF_TOKEN` over writing tokens into shell history. With an authenticated token, the server associates the published problem with the user's private ProblemProof account and ignores any legacy local participant ID for ownership.

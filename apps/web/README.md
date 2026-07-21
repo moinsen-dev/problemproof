@@ -17,6 +17,7 @@ Astro-Seite
   ├─ GET /auth/github/callback    GitHub OAuth callback
   ├─ POST /auth/logout
   ├─ GET /account/                private account and skill tokens
+  ├─ GET /api/account/me          verify session or personal skill token
   ├─ POST /api/account/tokens     create personal skill token
   └─ GET /api/v1/problems         nur aggregierte öffentliche Daten
                     │
@@ -48,7 +49,7 @@ GitHub OAuth App:
 - Callback URL: `https://problemproof.moinsen.dev/auth/github/callback`
 - Scopes: keine optionalen Scopes anfordern
 
-Skill-Publishing kann mit einem persönlichen ProblemProof-Token erfolgen, der unter `/account/` erzeugt wird. Der Token wird nur einmal angezeigt; gespeichert wird nur ein Hash.
+Skill-Publishing kann mit einem persönlichen ProblemProof-Token erfolgen, der unter `/account/` erzeugt wird. Der Token wird nur einmal angezeigt; gespeichert wird nur ein Hash. Der Skill kann den Token per `login` lokal speichern, per `status` über `GET /api/account/me` prüfen und veröffentlicht danach accountgebunden per Bearer-Token.
 
 ## Lokal entwickeln
 

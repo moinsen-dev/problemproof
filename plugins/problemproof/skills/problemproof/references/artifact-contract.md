@@ -106,6 +106,19 @@ Transitioning from `opportunity-ready` to `shaping` additionally requires `--use
 Publish a confirmed, solution-free problem to the ProblemProof API only after explicit user confirmation:
 
 ```bash
+python3 <skill-dir>/scripts/problemproof_workspace.py login \
+  --token "<personal ProblemProof token from /account/>"
+```
+
+Verify the active publishing account:
+
+```bash
+python3 <skill-dir>/scripts/problemproof_workspace.py status
+```
+
+Then publish:
+
+```bash
 python3 <skill-dir>/scripts/problemproof_workspace.py publish \
   --statement "<solution-free problem>" \
   --origin firsthand \
@@ -113,12 +126,10 @@ python3 <skill-dir>/scripts/problemproof_workspace.py publish \
   --region "<region>" \
   --category "<category>" \
   --consequence "<observable consequence>" \
-  --participant-id "<stable local participant id>" \
-  --token "<personal ProblemProof token>" \
   --yes
 ```
 
-`publish` sends `source=skill`. Prefer `PROBLEMPROOF_TOKEN` over passing `--token` when shell history is persistent. It must not include raw notes, secrets, private transcripts, or personal data about third parties.
+`publish` sends `source=skill`. With an authenticated token, the server associates the problem with the private ProblemProof account and ignores any legacy local participant ID for ownership. Prefer `login` or `PROBLEMPROOF_TOKEN` over passing `--token` when shell history is persistent. Use `logout` to remove the locally stored token. Publishing must not include raw notes, secrets, private transcripts, or personal data about third parties.
 
 ## 3. State and transitions
 

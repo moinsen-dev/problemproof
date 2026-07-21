@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -20,12 +21,21 @@ SCRIPT = (
 
 
 class WorkspaceScriptTests(unittest.TestCase):
-    def run_script(self, *arguments: str, expected: int = 0) -> subprocess.CompletedProcess[str]:
+    def run_script(
+        self,
+        *arguments: str,
+        expected: int = 0,
+        env: dict[str, str] | None = None,
+    ) -> subprocess.CompletedProcess[str]:
+        process_env = os.environ.copy()
+        if env:
+            process_env.update(env)
         result = subprocess.run(
             [sys.executable, str(SCRIPT), *arguments],
             text=True,
             capture_output=True,
             check=False,
+            env=process_env,
         )
         self.assertEqual(
             result.returncode,
@@ -95,7 +105,48 @@ class WorkspaceScriptTests(unittest.TestCase):
     def test_publish_documents_personal_token_flag(self) -> None:
         result = self.run_script("publish", "--help")
         self.assertIn("--token", result.stdout)
+        self.assertIn("login", result.stdout)
         self.assertIn("PROBLEMPROOF_TOKEN", result.stdout)
+
+    def test_publish_requires_token_before_network(self) -> None:
+        with tempfile.TemporaryDirectory() as config_dir:
+            result = self.run_script(
+                "publish",
+                "--api-url",
+                "http://127.0.0.1:9/api/problems",
+                "--statement",
+                "Solo-Entwickler starten zu schnell mit Repos, bevor das Problem klar ist.",
+                "--origin",
+                "firsthand",
+                "--target-group",
+                "Solo-Entwickler/Indie-Hacker",
+                "--region",
+                "Deutschland",
+                "--category",
+                "Softwareentwicklung",
+                "--consequence",
+                "Viele Projekte werden begonnen, aber nicht veröffentlicht.",
+                "--yes",
+                expected=2,
+                env={"PROBLEMPROOF_CONFIG_DIR": config_dir, "PROBLEMPROOF_TOKEN": ""},
+            )
+        self.assertIn("publish requires a ProblemProof token", result.stderr)
+
+    def test_logout_removes_stored_token(self) -> None:
+        with tempfile.TemporaryDirectory() as config_dir:
+            config_path = Path(config_dir) / "config.json"
+            config_path.write_text(
+                json.dumps({"schema_version": "1.0", "token": "pp_test", "account": {"id": 1}}),
+                encoding="utf-8",
+            )
+            result = self.run_script(
+                "logout",
+                env={"PROBLEMPROOF_CONFIG_DIR": config_dir},
+            )
+            self.assertIn("Removed stored ProblemProof token", result.stdout)
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertNotIn("token", config)
+            self.assertNotIn("account", config)
 
     def test_repo_gate_creates_unique_pre_repo_record(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

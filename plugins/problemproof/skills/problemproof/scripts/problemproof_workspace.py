@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import getpass
 import json
 import os
 import re
@@ -17,7 +18,9 @@ from urllib.request import Request, urlopen
 
 
 SCHEMA_VERSION = "1.0"
+DEFAULT_SITE_URL = "https://problemproof.moinsen.dev"
 DEFAULT_API_URL = "https://problemproof.moinsen.dev/api/problems"
+CONFIG_VERSION = "1.0"
 PROJECT_FILES = (
     "state.json",
     "idea.md",
@@ -111,6 +114,81 @@ EVIDENCE_ID = re.compile(r"^E-[0-9]{3,}$")
 
 class WorkspaceError(RuntimeError):
     """A user-correctable workspace integrity error."""
+
+
+def config_dir() -> Path:
+    override = os.environ.get("PROBLEMPROOF_CONFIG_DIR")
+    if override:
+        return Path(override).expanduser().resolve()
+    xdg_config = os.environ.get("XDG_CONFIG_HOME")
+    if xdg_config:
+        return Path(xdg_config).expanduser().resolve() / "problemproof"
+    return Path.home().resolve() / ".config" / "problemproof"
+
+
+def config_path() -> Path:
+    return config_dir() / "config.json"
+
+
+def load_config() -> dict[str, Any]:
+    path = config_path()
+    if not path.is_file():
+        return {"schema_version": CONFIG_VERSION}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise WorkspaceError(f"invalid ProblemProof config: {path}: {error}") from error
+    if not isinstance(data, dict):
+        raise WorkspaceError(f"ProblemProof config must contain a JSON object: {path}")
+    return data
+
+
+def save_config(data: dict[str, Any]) -> Path:
+    path = config_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data["schema_version"] = CONFIG_VERSION
+    atomic_write_json(path, data)
+    try:
+        path.chmod(0o600)
+    except OSError:
+        pass
+    return path
+
+
+def configured_token() -> str:
+    token = os.environ.get("PROBLEMPROOF_TOKEN", "").strip()
+    if token:
+        return token
+    value = load_config().get("token", "")
+    return value.strip() if isinstance(value, str) else ""
+
+
+def site_api_url(site_url: str, path: str) -> str:
+    return f"{site_url.rstrip('/')}{path}"
+
+
+def api_get_json(url: str, token: str, timeout_seconds: int) -> dict[str, Any]:
+    headers = {
+        "accept": "application/json",
+        "authorization": f"Bearer {token}",
+        "user-agent": "ProblemProofSkill/0.1 (+https://github.com/moinsen-dev/problemproof)",
+    }
+    request = Request(url, headers=headers, method="GET")
+    try:
+        with urlopen(request, timeout=timeout_seconds) as response:
+            response_body = response.read().decode("utf-8")
+    except HTTPError as error:
+        detail = error.read().decode("utf-8", errors="replace")
+        raise WorkspaceError(f"request failed with HTTP {error.code}: {detail}") from error
+    except URLError as error:
+        raise WorkspaceError(f"request failed: {error.reason}") from error
+    try:
+        data = json.loads(response_body)
+    except json.JSONDecodeError as error:
+        raise WorkspaceError(f"request returned invalid JSON: {response_body}") from error
+    if not isinstance(data, dict):
+        raise WorkspaceError("request returned non-object JSON")
+    return data
 
 
 def utc_now() -> datetime:
@@ -593,10 +671,67 @@ def command_transition(args: argparse.Namespace) -> None:
     print(f"Stage: {current} -> {target}")
 
 
+def command_login(args: argparse.Namespace) -> None:
+    token = (args.token or "").strip()
+    if not token:
+        token = getpass.getpass("ProblemProof token: ").strip()
+    if not token:
+        raise WorkspaceError("login requires a ProblemProof personal token")
+    account = api_get_json(
+        site_api_url(args.site_url, "/api/account/me"),
+        token,
+        args.timeout_seconds,
+    )
+    config = load_config()
+    config["site_url"] = args.site_url.rstrip("/")
+    config["token"] = token
+    config["account"] = {
+        "id": account.get("id"),
+        "displayName": account.get("displayName"),
+    }
+    path = save_config(config)
+    print(f"Logged in as {account.get('displayName')} (account {account.get('id')})")
+    print(f"Config: {path}")
+    print("Publishing will now use this account token unless PROBLEMPROOF_TOKEN is set.")
+
+
+def command_status(args: argparse.Namespace) -> None:
+    token = configured_token()
+    if not token:
+        raise WorkspaceError(
+            "not logged in; create a token under /account/ and run `problemproof_workspace.py login --token <token>`"
+        )
+    site_url = args.site_url or str(load_config().get("site_url") or DEFAULT_SITE_URL)
+    account = api_get_json(
+        site_api_url(site_url, "/api/account/me"),
+        token,
+        args.timeout_seconds,
+    )
+    source = "PROBLEMPROOF_TOKEN" if os.environ.get("PROBLEMPROOF_TOKEN") else str(config_path())
+    print(f"Logged in as {account.get('displayName')} (account {account.get('id')})")
+    print(f"Token source: {source}")
+
+
+def command_logout(args: argparse.Namespace) -> None:
+    config = load_config()
+    had_token = bool(config.pop("token", None))
+    config.pop("account", None)
+    save_config(config)
+    if had_token:
+        print("Removed stored ProblemProof token.")
+    else:
+        print("No stored ProblemProof token found.")
+
+
 def command_publish(args: argparse.Namespace) -> None:
     if not args.yes:
         raise WorkspaceError("publish requires --yes after explicit user confirmation")
-    token = args.token or os.environ.get("PROBLEMPROOF_TOKEN", "")
+    token = (args.token or "").strip() or configured_token()
+    if not token:
+        raise WorkspaceError(
+            "publish requires a ProblemProof token; create one under /account/ and run `login`, pass --token, or set PROBLEMPROOF_TOKEN"
+        )
+    participant_id = args.participant_id or "account-token"
     payload = {
         "statement": single_line(args.statement, "statement", maximum=280),
         "origin": args.origin,
@@ -604,7 +739,7 @@ def command_publish(args: argparse.Namespace) -> None:
         "region": single_line(args.region, "region", maximum=80),
         "category": single_line(args.category, "category", maximum=80),
         "consequence": single_line(args.consequence, "consequence", maximum=400),
-        "participantId": single_line(args.participant_id, "participant ID", maximum=120),
+        "participantId": single_line(participant_id, "participant ID", maximum=120),
         "source": "skill",
     }
     headers = {
@@ -727,6 +862,29 @@ def build_parser() -> argparse.ArgumentParser:
     )
     transition_parser.set_defaults(handler=command_transition)
 
+    login_parser = subparsers.add_parser(
+        "login", help="store and verify a personal ProblemProof token for publishing"
+    )
+    login_parser.add_argument("--site-url", default=DEFAULT_SITE_URL)
+    login_parser.add_argument(
+        "--token",
+        help="ProblemProof personal token from /account/; omitted values are read from a hidden prompt",
+    )
+    login_parser.add_argument("--timeout-seconds", type=int, default=15)
+    login_parser.set_defaults(handler=command_login)
+
+    status_parser = subparsers.add_parser(
+        "status", help="verify the active ProblemProof publishing account"
+    )
+    status_parser.add_argument("--site-url")
+    status_parser.add_argument("--timeout-seconds", type=int, default=15)
+    status_parser.set_defaults(handler=command_status)
+
+    logout_parser = subparsers.add_parser(
+        "logout", help="remove the locally stored ProblemProof token"
+    )
+    logout_parser.set_defaults(handler=command_logout)
+
     publish_parser = subparsers.add_parser(
         "publish", help="publish a confirmed problem to the ProblemProof API"
     )
@@ -737,8 +895,14 @@ def build_parser() -> argparse.ArgumentParser:
     publish_parser.add_argument("--region", required=True)
     publish_parser.add_argument("--category", required=True)
     publish_parser.add_argument("--consequence", required=True)
-    publish_parser.add_argument("--participant-id", required=True)
-    publish_parser.add_argument("--token", help="ProblemProof personal token; alternatively set PROBLEMPROOF_TOKEN")
+    publish_parser.add_argument(
+        "--participant-id",
+        help="legacy local participant ID; with a token the server uses the authenticated account",
+    )
+    publish_parser.add_argument(
+        "--token",
+        help="ProblemProof personal token; alternatively run login or set PROBLEMPROOF_TOKEN",
+    )
     publish_parser.add_argument("--timeout-seconds", type=int, default=15)
     publish_parser.add_argument(
         "--yes",

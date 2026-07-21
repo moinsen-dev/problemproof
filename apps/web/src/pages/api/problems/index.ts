@@ -27,8 +27,8 @@ export const POST: APIRoute = async ({ request }) => {
     const slug = `${slugify(input.statement)}-${crypto.randomUUID().slice(0, 8)}`;
     const result = await env.DB.prepare(`
       INSERT INTO problems
-        (slug, statement, origin, target_group, region, category, consequence, author_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        (slug, statement, origin, target_group, region, category, consequence, author_id, source)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       slug,
       input.statement,
@@ -38,6 +38,7 @@ export const POST: APIRoute = async ({ request }) => {
       input.category,
       input.consequence,
       input.participantId,
+      input.source,
     ).run();
     return json({ id: result.meta.last_row_id, slug }, { status: 201 });
   } catch (error) {

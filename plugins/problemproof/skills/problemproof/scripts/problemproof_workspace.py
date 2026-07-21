@@ -12,9 +12,12 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 
 SCHEMA_VERSION = "1.0"
+DEFAULT_API_URL = "https://problemproof.moinsen.dev/api/problems"
 PROJECT_FILES = (
     "state.json",
     "idea.md",
@@ -585,6 +588,43 @@ def command_transition(args: argparse.Namespace) -> None:
     print(f"Stage: {current} -> {target}")
 
 
+def command_publish(args: argparse.Namespace) -> None:
+    if not args.yes:
+        raise WorkspaceError("publish requires --yes after explicit user confirmation")
+    payload = {
+        "statement": single_line(args.statement, "statement", maximum=280),
+        "origin": args.origin,
+        "targetGroup": single_line(args.target_group, "target group", maximum=80),
+        "region": single_line(args.region, "region", maximum=80),
+        "category": single_line(args.category, "category", maximum=80),
+        "consequence": single_line(args.consequence, "consequence", maximum=400),
+        "participantId": single_line(args.participant_id, "participant ID", maximum=120),
+        "source": "skill",
+    }
+    request = Request(
+        args.api_url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "content-type": "application/json",
+            "user-agent": "ProblemProofSkill/0.1 (+https://github.com/moinsen-dev/problemproof)",
+        },
+        method="POST",
+    )
+    try:
+        with urlopen(request, timeout=args.timeout_seconds) as response:
+            response_body = response.read().decode("utf-8")
+    except HTTPError as error:
+        detail = error.read().decode("utf-8", errors="replace")
+        raise WorkspaceError(f"publish failed with HTTP {error.code}: {detail}") from error
+    except URLError as error:
+        raise WorkspaceError(f"publish failed: {error.reason}") from error
+    try:
+        result = json.loads(response_body)
+    except json.JSONDecodeError as error:
+        raise WorkspaceError(f"publish returned invalid JSON: {response_body}") from error
+    print(f"Published problem {result.get('id')} ({result.get('slug')})")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Manage a non-destructive ProblemProof artifact workspace."
@@ -597,6 +637,15 @@ def build_parser() -> argparse.ArgumentParser:
     init_parser.add_argument("--title", required=True)
     init_parser.add_argument("--cooling-off-hours", type=int, default=72)
     init_parser.set_defaults(handler=command_init)
+
+    add_parser = subparsers.add_parser(
+        "add", help="capture an idea locally without publishing it"
+    )
+    add_parser.add_argument("--root", required=True, help="parent directory")
+    add_parser.add_argument("--project-dir", default="problem-proof")
+    add_parser.add_argument("--title", required=True)
+    add_parser.add_argument("--cooling-off-hours", type=int, default=72)
+    add_parser.set_defaults(handler=command_init)
 
     check_parser = subparsers.add_parser("check", help="validate workspace integrity")
     check_parser.add_argument("--project", required=True)
@@ -635,6 +684,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="confirm that the user explicitly requested Opportunity Shaping",
     )
     transition_parser.set_defaults(handler=command_transition)
+
+    publish_parser = subparsers.add_parser(
+        "publish", help="publish a confirmed problem to the ProblemProof API"
+    )
+    publish_parser.add_argument("--api-url", default=DEFAULT_API_URL)
+    publish_parser.add_argument("--statement", required=True)
+    publish_parser.add_argument("--origin", required=True, choices=("firsthand", "hypothesis"))
+    publish_parser.add_argument("--target-group", required=True)
+    publish_parser.add_argument("--region", required=True)
+    publish_parser.add_argument("--category", required=True)
+    publish_parser.add_argument("--consequence", required=True)
+    publish_parser.add_argument("--participant-id", required=True)
+    publish_parser.add_argument("--timeout-seconds", type=int, default=15)
+    publish_parser.add_argument(
+        "--yes",
+        action="store_true",
+        help="confirm that the user explicitly approved public publishing",
+    )
+    publish_parser.set_defaults(handler=command_publish)
     return parser
 
 

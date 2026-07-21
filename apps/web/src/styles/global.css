@@ -198,6 +198,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .origin { padding: 5px 8px; border-radius: 2px; }
 .origin.firsthand { color: var(--green); background: var(--green-soft); }
 .origin.hypothesis { color: var(--amber); background: var(--amber-soft); }
+.source { color: var(--blue); }
 .problem h2 { max-width: 930px; margin: 0; font-family: var(--serif); font-size: clamp(25px, 2.55vw, 38px); line-height: 1.18; letter-spacing: -.028em; font-weight: 400; }
 .consequence { max-width: 830px; margin: 14px 0 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
 .workarounds { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 20px; }

@@ -64,6 +64,34 @@ class WorkspaceScriptTests(unittest.TestCase):
             self.assertIn("idea.md", result.stdout)
             self.assertIn("Preserved existing", result.stdout)
 
+    def test_add_alias_initializes_workspace(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            self.run_script("add", "--root", directory, "--title", "Repo reflex")
+            self.run_script("check", "--project", str(Path(directory) / "problem-proof"))
+
+    def test_publish_requires_explicit_confirmation(self) -> None:
+        result = self.run_script(
+            "publish",
+            "--api-url",
+            "http://127.0.0.1:9/api/problems",
+            "--statement",
+            "Solo-Entwickler starten zu schnell mit Repos, bevor das Problem klar ist.",
+            "--origin",
+            "firsthand",
+            "--target-group",
+            "Solo-Entwickler/Indie-Hacker",
+            "--region",
+            "Deutschland",
+            "--category",
+            "Softwareentwicklung",
+            "--consequence",
+            "Viele Projekte werden begonnen, aber nicht veröffentlicht.",
+            "--participant-id",
+            "participant-123",
+            expected=2,
+        )
+        self.assertIn("publish requires --yes", result.stderr)
+
     def test_gate_blocks_premature_shaping(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = self.initialize(Path(directory))

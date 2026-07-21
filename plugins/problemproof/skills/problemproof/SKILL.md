@@ -14,6 +14,7 @@ Default to Problem Validation. Enter Opportunity Shaping only after the evidence
 Interpret `$problemproof <intent>` and equivalent natural language. Use these intents:
 
 - `capture`: Record an idea neutrally without evaluating or expanding it.
+- `add`: Create or update a local ProblemProof artifact workspace without publishing.
 - `validate`: Run Problem Validation and produce the complete report.
 - `challenge`: Make the strongest evidence-based case that the idea may fail.
 - `evidence`: Inventory supporting, contradicting, and missing evidence.
@@ -26,8 +27,9 @@ Interpret `$problemproof <intent>` and equivalent natural language. Use these in
 - `decision`: Choose Stop, Observe further, Validate before building, Narrow the target group, Reframe the problem, Prototype one critical assumption, or Proceed to opportunity shaping.
 - `status`: Summarize lifecycle state, evidence gate, verdict, and next evidence-producing action.
 - `init`: Create a local artifact workspace without overwriting existing work.
+- `publish`: Publish a solution-free problem to the configured ProblemProof API only after explicit user confirmation.
 
-If the intent is ambiguous, capture the idea and ask one focused question that most reduces decision uncertainty. Do not turn a capture request into validation or brainstorming.
+If the intent is ambiguous, capture the idea and ask one focused question that most reduces decision uncertainty. Do not turn a capture request into validation, publishing, or brainstorming.
 
 ## Load the required guidance
 
@@ -47,6 +49,7 @@ If the intent is ambiguous, capture the idea and ask one focused question that m
 - Ask one focused question at a time when information is missing. Prefer the question with the highest expected information gain.
 - Summarize learned facts, live assumptions, and decisive unknowns after each conversational phase.
 - Do not recommend a full application as the first experiment.
+- Do not publish anything publicly without explicit user confirmation in the current conversation.
 - Define stop, narrow, or reframe criteria before running an experiment.
 - Do not enter Opportunity Shaping automatically. A passing score is not an evidence gate.
 - Preserve prior assumptions and decisions. Mark them confirmed, rejected, or superseded; never silently rewrite history.
@@ -110,4 +113,30 @@ Initialize with:
 python3 <this-skill-dir>/scripts/problemproof_workspace.py init --root <chosen-directory> --title "<idea title>"
 ```
 
+Use `add` as the preferred user-facing alias for local capture:
+
+```bash
+python3 <this-skill-dir>/scripts/problemproof_workspace.py add --root <chosen-directory> --title "<idea title>"
+```
+
 Use the script's `gate`, `decision`, `transition`, and `check` commands as defined in `references/artifact-contract.md`. Never use `--force`; the script intentionally refuses to overwrite existing files. Record important changes in `history.md` and keep evidence IDs traceable from scorecards and decisions.
+
+## Publish to ProblemProof
+
+Use `publish` only when the user explicitly confirms that a problem should be public. Publish only the solution-free problem statement, target group, region, category, consequence, origin, participant ID, and `source=skill`. Do not include raw notes, private transcripts, secrets, repository names that should remain private, or personal data about third parties.
+
+Run:
+
+```bash
+python3 <this-skill-dir>/scripts/problemproof_workspace.py publish \
+  --statement "<solution-free problem>" \
+  --origin firsthand \
+  --target-group "<smallest target group>" \
+  --region "<region>" \
+  --category "<category>" \
+  --consequence "<observable consequence>" \
+  --participant-id "<stable local participant id>" \
+  --yes
+```
+
+The default API target is `https://problemproof.moinsen.dev/api/problems`. Use `--api-url` for local or staging environments.

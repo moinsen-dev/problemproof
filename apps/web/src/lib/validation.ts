@@ -2,6 +2,7 @@ import {
   FREQUENCIES,
   HAPPENED_OPTIONS,
   ORIGINS,
+  SOURCES,
   type EvidenceInput,
   type ProblemInput,
 } from './types';
@@ -19,6 +20,7 @@ export function parseProblemInput(value: unknown): { data?: ProblemInput; errors
     category: text(body.category),
     consequence: text(body.consequence),
     participantId: participant(body.participantId),
+    source: (text(body.source) || 'web') as ProblemInput['source'],
   };
   const errors: string[] = [];
   if (data.statement.length < 20 || data.statement.length > 280) errors.push('Das Problem muss 20 bis 280 Zeichen lang sein.');
@@ -28,6 +30,7 @@ export function parseProblemInput(value: unknown): { data?: ProblemInput; errors
   if (data.category.length < 2 || data.category.length > 80) errors.push('Bitte nenne eine Kategorie.');
   if (data.consequence.length < 10 || data.consequence.length > 400) errors.push('Beschreibe kurz die Folge des ungelösten Problems.');
   if (data.participantId.length < 8) errors.push('Die anonyme Teilnehmer-ID fehlt.');
+  if (!SOURCES.includes(data.source)) errors.push('Die Quelle des Problems ist ungültig.');
   return errors.length ? { errors } : { data, errors };
 }
 

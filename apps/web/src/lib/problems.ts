@@ -4,7 +4,7 @@ import type { FeedFilters, ProblemRow } from './types';
 const SELECT_PROBLEMS = `
   SELECT
     p.id, p.slug, p.statement, p.origin, p.target_group, p.region, p.category,
-    p.consequence, p.proof_status, p.created_at,
+    p.consequence, p.source, p.proof_status, p.created_at,
     COUNT(DISTINCT c.id) AS confirmations_count,
     COUNT(DISTINCT e.id) AS incidents_count,
     ROUND(AVG(e.severity), 1) AS average_severity,

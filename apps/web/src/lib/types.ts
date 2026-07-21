@@ -1,8 +1,10 @@
 export const ORIGINS = ['firsthand', 'hypothesis'] as const;
+export const SOURCES = ['web', 'skill', 'api'] as const;
 export const HAPPENED_OPTIONS = ['7-days', '30-days', '90-days', 'older'] as const;
 export const FREQUENCIES = ['once', 'monthly', 'weekly', 'daily'] as const;
 
 export type Origin = (typeof ORIGINS)[number];
+export type Source = (typeof SOURCES)[number];
 export type Happened = (typeof HAPPENED_OPTIONS)[number];
 export type Frequency = (typeof FREQUENCIES)[number];
 
@@ -15,6 +17,7 @@ export interface ProblemRow {
   region: string;
   category: string;
   consequence: string;
+  source: Source;
   proof_status: 'needs-proof' | 'strong';
   created_at: string;
   confirmations_count: number;
@@ -40,6 +43,7 @@ export interface ProblemInput {
   category: string;
   consequence: string;
   participantId: string;
+  source: Source;
 }
 
 export interface EvidenceInput {

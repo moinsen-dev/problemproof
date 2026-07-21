@@ -12,7 +12,7 @@ export const GET: APIRoute = async ({ url }) => {
   const result = await env.DB.prepare(`
     SELECT
       p.id, p.slug, p.statement, p.origin, p.target_group, p.region, p.category,
-      p.consequence, p.proof_status, p.created_at,
+      p.consequence, p.source, p.proof_status, p.created_at,
       COUNT(DISTINCT c.id) AS confirmations,
       COUNT(DISTINCT e.id) AS incidents,
       ROUND(AVG(e.severity), 1) AS average_severity

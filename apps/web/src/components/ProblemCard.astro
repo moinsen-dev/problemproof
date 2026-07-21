@@ -4,6 +4,7 @@ import type { ProblemRow } from '../lib/types';
 interface Props { problem: ProblemRow; position: number }
 const { problem, position } = Astro.props;
 const originLabel = problem.origin === 'firsthand' ? 'Selbst erlebt' : 'Hypothese';
+const sourceLabel = problem.source === 'skill' ? 'via Skill' : problem.source === 'api' ? 'via API' : 'via Web';
 const workarounds = (problem.workarounds ?? '').split(',').map((item) => item.trim()).filter(Boolean).slice(0, 3);
 const reportUrl = `mailto:developer@moinsen.dev?subject=${encodeURIComponent(`ProblemProof: Inhalt #${problem.id} melden`)}&body=${encodeURIComponent(`Ich möchte folgenden Inhalt melden:\n\nProblem-ID: ${problem.id}\nURL: https://problemproof.moinsen.dev/#problem-${problem.id}\n\nGrund der Meldung:\n`)}`;
 ---
@@ -13,6 +14,7 @@ const reportUrl = `mailto:developer@moinsen.dev?subject=${encodeURIComponent(`Pr
   <div class="problem-body">
     <div class="eyebrow-row">
       <span class:list={['origin', problem.origin]}>{originLabel}</span>
+      <span class:list={['source', problem.source]}>{sourceLabel}</span>
       <span>{problem.region}</span>
       <span>{problem.target_group}</span>
     </div>

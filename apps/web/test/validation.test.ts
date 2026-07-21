@@ -11,9 +11,25 @@ describe('problem validation', () => {
       category: 'Softwareentwicklung',
       consequence: 'Der erste Nutzertest startet mehrere Tage später.',
       participantId: 'participant-123',
+      source: 'skill',
     });
     expect(result.errors).toEqual([]);
     expect(result.data?.statement).toContain('Side Projects');
+    expect(result.data?.source).toBe('skill');
+  });
+
+  it('defaults the problem source to web', () => {
+    const result = parseProblemInput({
+      statement: 'Solo-Entwickler starten zu schnell mit Repos, bevor das Problem klar ist.',
+      origin: 'firsthand',
+      targetGroup: 'Indie-Hacker',
+      region: 'Deutschland',
+      category: 'Softwareentwicklung',
+      consequence: 'Viele Projekte werden begonnen, aber nicht veröffentlicht.',
+      participantId: 'participant-123',
+    });
+    expect(result.errors).toEqual([]);
+    expect(result.data?.source).toBe('web');
   });
 
   it('rejects statements longer than 280 characters', () => {

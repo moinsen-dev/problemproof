@@ -43,6 +43,15 @@ python3 <skill-dir>/scripts/problemproof_workspace.py init \
   --cooling-off-hours 72
 ```
 
+`add` is the user-facing alias for local capture and accepts the same arguments as `init`:
+
+```bash
+python3 <skill-dir>/scripts/problemproof_workspace.py add \
+  --root <chosen-parent-directory> \
+  --title "<idea title>" \
+  --cooling-off-hours 72
+```
+
 The command creates `<chosen-parent-directory>/problem-proof/` by default. Use `--project-dir <single-directory-name>` to keep multiple ideas under one parent. Do not use paths containing `/`, `..`, or an absolute path as `--project-dir`.
 
 Check structure and state integrity:
@@ -83,6 +92,22 @@ python3 <skill-dir>/scripts/problemproof_workspace.py transition \
 ```
 
 Transitioning from `opportunity-ready` to `shaping` additionally requires `--user-confirmed`. Never infer that confirmation from a passing gate.
+
+Publish a confirmed, solution-free problem to the ProblemProof API only after explicit user confirmation:
+
+```bash
+python3 <skill-dir>/scripts/problemproof_workspace.py publish \
+  --statement "<solution-free problem>" \
+  --origin firsthand \
+  --target-group "<smallest target group>" \
+  --region "<region>" \
+  --category "<category>" \
+  --consequence "<observable consequence>" \
+  --participant-id "<stable local participant id>" \
+  --yes
+```
+
+`publish` sends `source=skill`. It must not include raw notes, secrets, private transcripts, or personal data about third parties.
 
 ## 3. State and transitions
 

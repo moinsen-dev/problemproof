@@ -1,0 +1,51 @@
+<dialog class="modal" id="publish-dialog" aria-labelledby="publish-title">
+  <div class="modal-shell">
+    <div class="modal-header">
+      <div>
+        <p class="modal-kicker">Neues Problem</p>
+        <h2 id="publish-title">Problem formulieren</h2>
+        <p>Beschreibe das Problem ohne deine Lösung.</p>
+      </div>
+      <button class="icon-button" type="button" data-close aria-label="Dialog schließen">×</button>
+    </div>
+    <form id="publish-form">
+      <fieldset class="choice-group">
+        <legend>Woher kennst du das Problem?</legend>
+        <label class="choice">
+          <input type="radio" name="origin" value="firsthand" checked />
+          <span><strong>Selbst erlebt</strong><small>Du hast eine konkrete Situation erlebt.</small></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="origin" value="hypothesis" />
+          <span><strong>Hypothese</strong><small>Du vermutest das Problem und suchst Belege.</small></span>
+        </label>
+      </fieldset>
+
+      <label class="field field-wide">
+        <span>Problem</span>
+        <textarea name="statement" rows="4" minlength="20" maxlength="280" required placeholder="Wenn … versucht … entsteht … weil …"></textarea>
+        <span class="field-meta"><small class="solution-warning" hidden>Lösungsbegriff erkannt – formuliere nur das Problem.</small><small><output id="statement-count">0</output>/280</small></span>
+      </label>
+
+      <div class="field-grid three">
+        <label class="field"><span>Zielgruppe</span><input name="targetGroup" maxlength="80" required placeholder="z. B. Entwickler" /></label>
+        <label class="field"><span>Region</span><input name="region" maxlength="80" required placeholder="z. B. Berlin" /></label>
+        <label class="field"><span>Kategorie</span><input name="category" maxlength="80" required placeholder="z. B. Arbeit" /></label>
+      </div>
+
+      <label class="field field-wide">
+        <span>Was passiert, wenn das Problem ungelöst bleibt?</span>
+        <textarea name="consequence" rows="3" minlength="10" maxlength="400" required placeholder="Beschreibe die konkrete Folge."></textarea>
+      </label>
+      <label class="consent consent-copy">
+        <input type="checkbox" name="termsAccepted" required />
+        <span>Ich veröffentliche diesen Inhalt öffentlich, habe keine personenbezogenen Daten Dritter angegeben und akzeptiere die <a href="/nutzungsbedingungen" target="_blank" rel="noopener">Nutzungsbedingungen</a>. Hinweise zur Verarbeitung stehen im <a href="/datenschutz" target="_blank" rel="noopener">Datenschutz</a>.</span>
+      </label>
+      <div class="form-message" role="alert" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button class="button secondary" type="button" data-close>Abbrechen</button>
+        <button class="button primary" type="submit">Problem veröffentlichen</button>
+      </div>
+    </form>
+  </div>
+</dialog>

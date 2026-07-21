@@ -1,0 +1,60 @@
+<dialog class="modal" id="evidence-dialog" aria-labelledby="evidence-title">
+  <div class="modal-shell">
+    <div class="modal-header">
+      <div>
+        <p class="modal-kicker">Konkrete Evidenz</p>
+        <h2 id="evidence-title">Eigenen Vorfall ergänzen</h2>
+        <p>Nur eigene, konkrete Erfahrungen zählen als Evidenz.</p>
+      </div>
+      <button class="icon-button" type="button" data-close aria-label="Dialog schließen">×</button>
+    </div>
+    <form id="evidence-form">
+      <input type="hidden" name="problemId" />
+      <fieldset class="segmented-field">
+        <legend>Wann ist das passiert?</legend>
+        <div class="segmented four">
+          <label><input type="radio" name="happened" value="7-days" checked /><span>Letzte 7 Tage</span></label>
+          <label><input type="radio" name="happened" value="30-days" /><span>30 Tage</span></label>
+          <label><input type="radio" name="happened" value="90-days" /><span>90 Tage</span></label>
+          <label><input type="radio" name="happened" value="older" /><span>Länger her</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="segmented-field">
+        <legend>Wie häufig tritt es auf?</legend>
+        <div class="segmented four">
+          <label><input type="radio" name="frequency" value="once" /><span>Einmalig</span></label>
+          <label><input type="radio" name="frequency" value="monthly" /><span>Monatlich</span></label>
+          <label><input type="radio" name="frequency" value="weekly" checked /><span>Wöchentlich</span></label>
+          <label><input type="radio" name="frequency" value="daily" /><span>Täglich</span></label>
+        </div>
+      </fieldset>
+      <label class="field severity-field">
+        <span>Wie stark war die Auswirkung?</span>
+        <input type="range" name="severity" min="1" max="5" value="3" step="1" />
+        <span class="severity-labels"><small>1 · Kaum</small><output>3</output><small>5 · Kritisch</small></span>
+      </label>
+      <label class="field field-wide">
+        <span>Was ist konkret passiert?</span>
+        <textarea name="story" rows="4" minlength="20" maxlength="1200" required placeholder="Beschreibe eine einzelne Situation: Was wolltest du tun, was ist passiert und was war die Folge?"></textarea>
+      </label>
+      <div class="field-grid two">
+        <label class="field"><span>Dein Workaround <small>(optional)</small></span><input name="workaround" maxlength="240" placeholder="Was hast du stattdessen gemacht?" /></label>
+        <label class="field"><span>Region</span><input name="region" maxlength="80" required placeholder="z. B. Berlin" /></label>
+      </div>
+      <label class="consent">
+        <input type="checkbox" name="ownExperience" required />
+        <span>Ich habe diesen Vorfall selbst erlebt.</span>
+      </label>
+      <label class="consent consent-copy">
+        <input type="checkbox" name="termsAccepted" required />
+        <span>Mein Text enthält keine personenbezogenen Daten Dritter. Ich akzeptiere die <a href="/nutzungsbedingungen" target="_blank" rel="noopener">Nutzungsbedingungen</a> und habe die <a href="/datenschutz" target="_blank" rel="noopener">Datenschutzhinweise</a> gelesen.</span>
+      </label>
+      <p class="privacy-note">Dein Vorfall wird pseudonym gespeichert. Öffentlich erscheinen aggregierte Zahlen und gegebenenfalls dein Workaround; Teilnehmer-ID und Vorfalltext stehen nicht in der öffentlichen API.</p>
+      <div class="form-message" role="alert" aria-live="polite"></div>
+      <div class="modal-actions">
+        <button class="button secondary" type="button" data-close>Abbrechen</button>
+        <button class="button primary" type="submit">Vorfall hinzufügen</button>
+      </div>
+    </form>
+  </div>
+</dialog>

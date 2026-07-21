@@ -1,0 +1,4 @@
+interface:
+  display_name: "ProblemProof"
+  short_description: "Validate problems before building products"
+  default_prompt: "Use $problemproof to test whether this idea solves a validated problem."

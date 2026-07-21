@@ -1,0 +1,45 @@
+---
+import SiteFooter from '../components/SiteFooter.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  eyebrow: string;
+  updated: string;
+}
+
+const { title, description, eyebrow, updated } = Astro.props;
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#ffffff" />
+    <title>{title} – ProblemProof</title>
+  </head>
+  <body>
+    <header class="site-header legal-header">
+      <a class="brand" href="/" aria-label="ProblemProof Startseite">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span>ProblemProof</span>
+      </a>
+      <a class="back-link" href="/">← Zur Problem-Datenbank</a>
+    </header>
+    <main class="legal-main">
+      <header class="legal-title">
+        <p class="section-kicker">{eyebrow}</p>
+        <h1>{title}</h1>
+        <p>{description}</p>
+        <small>Stand: {updated}</small>
+      </header>
+      <article class="legal-copy">
+        <slot />
+      </article>
+    </main>
+    <SiteFooter />
+  </body>
+</html>

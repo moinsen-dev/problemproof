@@ -1,0 +1,31 @@
+{
+  "name": "problemproof",
+  "version": "0.1.0",
+  "description": "Evidence-gated problem validation and opportunity shaping for product ideas.",
+  "author": {
+    "name": "ProblemProof contributors"
+  },
+  "keywords": [
+    "product-validation",
+    "customer-discovery",
+    "problem-discovery",
+    "opportunity-shaping"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ProblemProof",
+    "shortDescription": "Validate the problem before building the product.",
+    "longDescription": "An intellectually honest product-validation partner that separates personal enthusiasm from external demand, designs low-cost evidence tests, and only shapes products after the problem clears an explicit evidence gate.",
+    "developerName": "ProblemProof contributors",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Capture this idea without turning it into a project.",
+      "Challenge this product idea and identify its weakest assumptions.",
+      "Design the cheapest experiment that could invalidate this idea."
+    ]
+  }
+}

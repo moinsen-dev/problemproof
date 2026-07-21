@@ -1,0 +1,182 @@
+---
+import LegalLayout from '../layouts/LegalLayout.astro';
+---
+
+<LegalLayout
+  title="Datenschutzerklärung"
+  eyebrow="Datenschutz"
+  description="Welche Daten ProblemProof verarbeitet, wofür sie gebraucht werden und welche Rechte du hast."
+  updated="21. Juli 2026"
+>
+  <section class="legal-intro">
+    <p>
+      ProblemProof funktioniert ohne Nutzerkonto, Werbetracking oder Analyse-Cookies. Personenbezogene
+      Rohdaten werden nicht verkauft. Beiträge und Interaktionen sind jedoch öffentlich beziehungsweise
+      pseudonym gespeichert. Bitte veröffentliche keine Namen, Kontaktdaten oder sensiblen Informationen.
+    </p>
+  </section>
+
+  <section>
+    <h2>1. Verantwortlicher</h2>
+    <address>
+      Ulrich Diedrichsen<br />
+      Kippingstraße 27<br />
+      20144 Hamburg<br />
+      Deutschland<br />
+      E-Mail: <a href="mailto:developer@moinsen.dev">developer@moinsen.dev</a>
+    </address>
+  </section>
+
+  <section>
+    <h2>2. Aufruf der Website und technische Protokolle</h2>
+    <p>
+      Beim Aufruf verarbeitet unser Hosting-Anbieter technisch erforderliche Verbindungsdaten. Dazu können
+      IP-Adresse, Zeitpunkt, aufgerufene URL, HTTP-Methode, Statuscode, übertragene Datenmenge sowie Browser-
+      und Geräteangaben aus den Request-Headern gehören. Das ist nötig, um die Website auszuliefern, Angriffe
+      abzuwehren und Fehler zu untersuchen.
+    </p>
+    <p>
+      Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Unser berechtigtes Interesse liegt im sicheren,
+      zuverlässigen und missbrauchsarmen Betrieb des Dienstes. Technische Worker-Protokolle werden abhängig
+      vom Cloudflare-Tarif höchstens sieben Tage aufbewahrt; anwendungsseitig protokollieren wir keine
+      vollständigen Beitragstexte.
+    </p>
+  </section>
+
+  <section>
+    <h2>3. Hosting mit Cloudflare</h2>
+    <p>
+      Wir nutzen Cloudflare, Inc. als Auftragsverarbeiter für Website-Auslieferung, Cloudflare Workers,
+      D1-Datenbank und KV-Speicher. Die D1-Datenbank ist mit EU-Datenresidenz eingerichtet. Cloudflare kann
+      Verbindungs- und Servicedaten auch außerhalb des Europäischen Wirtschaftsraums verarbeiten. Die
+      Absicherung solcher Übermittlungen erfolgt nach den vertraglichen Regelungen von Cloudflare,
+      insbesondere über Angemessenheitsbeschlüsse und die EU-Standardvertragsklauseln.
+    </p>
+    <p>
+      Weitere Informationen: <a href="https://www.cloudflare.com/de-de/privacypolicy/" rel="external">Datenschutzerklärung von Cloudflare</a>
+      und <a href="https://www.cloudflare.com/de-de/cloudflare-customer-dpa/" rel="external">Cloudflare Data Processing Addendum</a>.
+    </p>
+  </section>
+
+  <section>
+    <h2>4. Probleme veröffentlichen</h2>
+    <p>
+      Wenn du ein Problem veröffentlichst, speichern wir den Problemtext, Ursprung (selbst erlebt oder
+      Hypothese), Zielgruppe, Region, Kategorie, Folge, Zeitpunkt und eine zufällig erzeugte Teilnehmer-ID.
+      Diese Inhalte – mit Ausnahme der Teilnehmer-ID – werden öffentlich auf der Website und über die
+      öffentliche API zusammen mit aggregierten Interaktionszahlen bereitgestellt.
+    </p>
+    <p>
+      Die Verarbeitung erfolgt zur Veröffentlichung des von dir angeforderten Beitrags und zur Bereitstellung
+      des Dienstes auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO. Soweit Inhalte moderiert und Missbrauch
+      verhindert werden, beruht sie zusätzlich auf Art. 6 Abs. 1 lit. f DSGVO.
+    </p>
+  </section>
+
+  <section>
+    <h2>5. Bestätigungen und Vorfälle</h2>
+    <p>
+      Bei „Selbst erlebt“ speichern wir Problem-ID, Teilnehmer-ID, optional eine Region und den Zeitpunkt.
+      Bei einem Vorfall kommen Zeitraum, Häufigkeit, Schweregrad, dein Freitext, ein optionaler Workaround und
+      eine Region hinzu. Öffentliche Problemkarten zeigen aggregierte Zahlen und können Workarounds anzeigen.
+      Der Vorfalltext und die Teilnehmer-ID werden nicht über die öffentliche API ausgegeben.
+    </p>
+    <p>
+      Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, weil du diese Funktion ausdrücklich anforderst. Die
+      Teilnehmer-ID ermöglicht die Zuordnung derselben Browser-Installation und verhindert doppelte Signale;
+      Rechtsgrundlage hierfür ist außerdem Art. 6 Abs. 1 lit. f DSGVO.
+    </p>
+  </section>
+
+  <section>
+    <h2>6. Lokaler Speicher statt Tracking</h2>
+    <p>
+      Erst wenn du ein Problem veröffentlichst, bestätigst oder einen Vorfall ergänzt, erzeugt dein Browser
+      eine zufällige Teilnehmer-ID und legt sie im lokalen Speicher (localStorage) ab. Sie wird nicht für
+      Werbung, Reichweitenmessung oder Profilbildung verwendet. Die Speicherung ist für die von dir
+      angeforderte Interaktion und den Schutz vor Doppelabgaben erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG).
+      Du kannst sie über die Website-Daten deines Browsers löschen; danach können frühere Beiträge nicht mehr
+      über diese Browser-Installation zugeordnet werden.
+    </p>
+  </section>
+
+  <section>
+    <h2>7. Empfänger, Veröffentlichung und API</h2>
+    <p>
+      Öffentlich eingestellte Probleminhalte sind weltweit abrufbar und können von Suchmaschinen erfasst,
+      geteilt oder anderweitig weiterverarbeitet werden. Die API kann auch kommerziell angeboten werden,
+      enthält aber keine Teilnehmer-IDs und keine vollständigen Vorfalltexte. Wir verkaufen keine
+      personenbezogenen Rohdaten. Neben Cloudflare erhalten nur Personen Zugriff, die den Dienst technisch
+      betreiben oder Inhalte moderieren müssen.
+    </p>
+  </section>
+
+  <section>
+    <h2>8. Speicherdauer</h2>
+    <p>
+      Veröffentlichte Probleme, Bestätigungen und Vorfälle bleiben gespeichert, solange sie für die
+      Problem-Datenbank und ihre Auswertung benötigt werden oder bis einer berechtigten Löschanfrage
+      entsprochen wird. Eine feste automatische Löschfrist besteht derzeit nicht. Daten können länger
+      gespeichert werden, wenn gesetzliche Pflichten oder die Verteidigung von Rechtsansprüchen dies erfordern.
+    </p>
+  </section>
+
+  <section>
+    <h2>9. Keine Pflicht zur Bereitstellung und keine automatisierten Entscheidungen</h2>
+    <p>
+      Du musst keine Beiträge oder Interaktionen übermitteln. Ohne die jeweiligen Pflichtangaben kann die
+      gewünschte Funktion allerdings nicht ausgeführt werden. Es findet keine automatisierte Entscheidung
+      mit rechtlicher oder ähnlich erheblicher Wirkung und kein Profiling statt.
+    </p>
+  </section>
+
+  <section>
+    <h2>10. Deine Rechte</h2>
+    <p>
+      Du hast – soweit die gesetzlichen Voraussetzungen vorliegen – Rechte auf Auskunft, Berichtigung,
+      Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Wenn eine Verarbeitung
+      auf Einwilligung beruht, kannst du diese für die Zukunft widerrufen. Für eine Anfrage schreibe an
+      <a href="mailto:developer@moinsen.dev">developer@moinsen.dev</a> und nenne möglichst den Link oder die
+      Problem-ID, den ungefähren Zeitpunkt und deine im Browser gespeicherte Teilnehmer-ID. Wir dürfen
+      zusätzliche Angaben anfordern, wenn sie zur sicheren Identifizierung erforderlich sind.
+    </p>
+    <div class="privacy-id" data-privacy-id>
+      <strong>Deine lokale Datenschutz-ID</strong>
+      <p data-privacy-id-value>Auf diesem Gerät ist noch keine Teilnehmer-ID gespeichert.</p>
+      <button class="button secondary" type="button" data-copy-privacy-id hidden>ID kopieren</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>11. Beschwerderecht</h2>
+    <p>
+      Du kannst dich bei einer Datenschutzaufsichtsbehörde beschweren, insbesondere beim Hamburgischen
+      Beauftragten für Datenschutz und Informationsfreiheit, Ludwig-Erhard-Str. 22, 20459 Hamburg.
+      Informationen und Online-Formulare findest du unter
+      <a href="https://datenschutz-hamburg.de/service-information/beschwerde-oder-hinweis-einreichen" rel="external">datenschutz-hamburg.de</a>.
+    </p>
+  </section>
+
+  <section>
+    <h2>12. Änderungen</h2>
+    <p>
+      Wir passen diese Erklärung an, wenn sich Funktionen, Anbieter oder die Rechtslage ändern. Die jeweils
+      aktuelle Fassung ist auf dieser Seite mit ihrem Stand veröffentlicht.
+    </p>
+  </section>
+
+  <script is:inline>
+    const key = 'problemproof-participant-id';
+    const id = localStorage.getItem(key);
+    const value = document.querySelector('[data-privacy-id-value]');
+    const copy = document.querySelector('[data-copy-privacy-id]');
+    if (id && value && copy) {
+      value.textContent = id;
+      copy.hidden = false;
+      copy.addEventListener('click', async () => {
+        await navigator.clipboard.writeText(id);
+        copy.textContent = 'Kopiert';
+      });
+    }
+  </script>
+</LegalLayout>

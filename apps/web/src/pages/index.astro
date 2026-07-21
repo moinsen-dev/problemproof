@@ -1,0 +1,105 @@
+---
+import { env } from 'cloudflare:workers';
+import EvidenceDialog from '../components/EvidenceDialog.astro';
+import ProblemCard from '../components/ProblemCard.astro';
+import PublishDialog from '../components/PublishDialog.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { getFilterOptions, getProblems } from '../lib/problems';
+import type { FeedFilters, Origin } from '../lib/types';
+import '../styles/global.css';
+
+const requestedMode = Astro.url.searchParams.get('mode');
+const requestedOrigin = Astro.url.searchParams.get('origin');
+const filters: FeedFilters = {
+  mode: requestedMode === 'new' || requestedMode === 'strong' ? requestedMode : 'needs-proof',
+  search: (Astro.url.searchParams.get('q') ?? '').slice(0, 120),
+  region: (Astro.url.searchParams.get('region') ?? '').slice(0, 80),
+  targetGroup: (Astro.url.searchParams.get('targetGroup') ?? '').slice(0, 80),
+  category: (Astro.url.searchParams.get('category') ?? '').slice(0, 80),
+  origin: requestedOrigin === 'firsthand' || requestedOrigin === 'hypothesis' ? (requestedOrigin as Origin) : '',
+};
+const [problems, options] = await Promise.all([getProblems(env.DB, filters), getFilterOptions(env.DB)]);
+const tabUrl = (mode: FeedFilters['mode']) => {
+  const params = new URLSearchParams(Astro.url.searchParams);
+  params.set('mode', mode);
+  return `/?${params}`;
+};
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content="ProblemProof macht Probleme sichtbar, bevor jemand Zeit in die nächste Lösung steckt." />
+    <meta name="theme-color" content="#ffffff" />
+    <title>ProblemProof – Probleme prüfen, bevor du Lösungen baust</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="ProblemProof Startseite">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span>ProblemProof</span>
+      </a>
+      <form class="search" method="get" action="/">
+        <input type="hidden" name="mode" value={filters.mode} />
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+        <input type="search" name="q" value={filters.search} placeholder="Probleme durchsuchen" aria-label="Probleme durchsuchen" />
+      </form>
+      <button class="button primary header-cta" type="button" data-open-publish>
+        <span aria-hidden="true">＋</span> Problem posten
+      </button>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="hero-kicker">Bevor du die nächste Lösung baust</p>
+        <h1>Ist das wirklich<br/>ein Problem?</h1>
+        <p class="hero-copy">Formuliere es klar. Lass Menschen konkrete Vorfälle ergänzen. Entscheide mit Evidenz statt mit Bauchgefühl.</p>
+      </section>
+
+      <section class="feed-shell" aria-labelledby="feed-heading">
+        <div class="feed-heading">
+          <div>
+            <p class="section-kicker">Öffentliche Problem-Datenbank</p>
+            <h2 id="feed-heading">Probleme, die Belege brauchen</h2>
+          </div>
+          <span class="result-count">{problems.length} {problems.length === 1 ? 'Problem' : 'Probleme'}</span>
+        </div>
+
+        <nav class="tabs" aria-label="Feed sortieren">
+          <a href={tabUrl('needs-proof')} aria-current={filters.mode === 'needs-proof' ? 'page' : undefined}>Needs Proof</a>
+          <a href={tabUrl('new')} aria-current={filters.mode === 'new' ? 'page' : undefined}>Neu</a>
+          <a href={tabUrl('strong')} aria-current={filters.mode === 'strong' ? 'page' : undefined}>Stark belegt</a>
+        </nav>
+
+        <form class="filters" method="get" action="/" data-filter-form>
+          <input type="hidden" name="mode" value={filters.mode} />
+          {filters.search && <input type="hidden" name="q" value={filters.search} />}
+          <label><span>Region</span><select name="region"><option value="">Alle Regionen</option>{options.regions.map((value) => <option value={value} selected={filters.region === value}>{value}</option>)}</select></label>
+          <label><span>Zielgruppe</span><select name="targetGroup"><option value="">Alle Zielgruppen</option>{options.groups.map((value) => <option value={value} selected={filters.targetGroup === value}>{value}</option>)}</select></label>
+          <label><span>Kategorie</span><select name="category"><option value="">Alle Kategorien</option>{options.categories.map((value) => <option value={value} selected={filters.category === value}>{value}</option>)}</select></label>
+          <label><span>Ursprung</span><select name="origin"><option value="">Jeder Ursprung</option><option value="firsthand" selected={filters.origin === 'firsthand'}>Selbst erlebt</option><option value="hypothesis" selected={filters.origin === 'hypothesis'}>Hypothese</option></select></label>
+        </form>
+
+        <div class="feed">
+          {problems.length ? problems.map((problem, index) => <ProblemCard problem={problem} position={index} />) : (
+            <div class="empty-state">
+              <p class="section-kicker">Noch kein Treffer</p>
+              <h2>Dieses Problem wartet vielleicht auf dich.</h2>
+              <p>Ändere die Filter oder formuliere das Problem so klar, dass andere es in Sekunden verstehen.</p>
+              <button class="button primary" type="button" data-open-publish>Problem posten</button>
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
+
+    <SiteFooter />
+
+    <PublishDialog />
+    <EvidenceDialog />
+    <div class="toast" role="status" aria-live="polite"></div>
+    <script src="../scripts/app.ts"></script>
+  </body>
+</html>

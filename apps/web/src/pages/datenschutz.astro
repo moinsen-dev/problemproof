@@ -62,8 +62,9 @@ import LegalLayout from '../layouts/LegalLayout.astro';
     <h2>4. Probleme veröffentlichen</h2>
     <p>
       Wenn du ein Problem veröffentlichst, speichern wir den Problemtext, Ursprung (selbst erlebt oder
-      Hypothese), Zielgruppe, Region, Kategorie, Folge, Zeitpunkt und eine zufällig erzeugte Teilnehmer-ID.
-      Diese Inhalte – mit Ausnahme der Teilnehmer-ID – werden öffentlich auf der Website und über die
+      Hypothese), Zielgruppe, Region, Kategorie, Folge, Quelle (Web, Skill oder API), Zeitpunkt und die
+      interne Account-Zuordnung oder eine technische Teilnehmer-ID aus Altdaten.
+      Diese Inhalte – mit Ausnahme der internen Account-Zuordnung und Teilnehmer-ID – werden öffentlich auf der Website und über die
       öffentliche API zusammen mit aggregierten Interaktionszahlen bereitgestellt.
     </p>
     <p>
@@ -76,27 +77,30 @@ import LegalLayout from '../layouts/LegalLayout.astro';
   <section>
     <h2>5. Bestätigungen und Vorfälle</h2>
     <p>
-      Bei „Selbst erlebt“ speichern wir Problem-ID, Teilnehmer-ID, optional eine Region und den Zeitpunkt.
+      Bei „Selbst erlebt“ speichern wir Problem-ID, interne Account-ID, optional eine Region und den Zeitpunkt.
       Bei einem Vorfall kommen Zeitraum, Häufigkeit, Schweregrad, dein Freitext, ein optionaler Workaround und
       eine Region hinzu. Öffentliche Problemkarten zeigen aggregierte Zahlen und können Workarounds anzeigen.
-      Der Vorfalltext und die Teilnehmer-ID werden nicht über die öffentliche API ausgegeben.
+      Der Vorfalltext, interne Account-IDs und Teilnehmer-IDs aus Altdaten werden nicht über die öffentliche API ausgegeben.
     </p>
     <p>
       Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, weil du diese Funktion ausdrücklich anforderst. Die
-      Teilnehmer-ID ermöglicht die Zuordnung derselben Browser-Installation und verhindert doppelte Signale;
+      interne Account-Zuordnung verhindert doppelte Signale und ermöglicht persönliche Ansichten wie Favoriten;
       Rechtsgrundlage hierfür ist außerdem Art. 6 Abs. 1 lit. f DSGVO.
     </p>
   </section>
 
   <section>
-    <h2>6. Lokaler Speicher statt Tracking</h2>
+    <h2>6. Login, Favoriten und Skill-Tokens</h2>
     <p>
-      Erst wenn du ein Problem veröffentlichst, bestätigst oder einen Vorfall ergänzt, erzeugt dein Browser
-      eine zufällige Teilnehmer-ID und legt sie im lokalen Speicher (localStorage) ab. Sie wird nicht für
-      Werbung, Reichweitenmessung oder Profilbildung verwendet. Die Speicherung ist für die von dir
-      angeforderte Interaktion und den Schutz vor Doppelabgaben erforderlich (§ 25 Abs. 2 Nr. 2 TDDDG).
-      Du kannst sie über die Website-Daten deines Browsers löschen; danach können frühere Beiträge nicht mehr
-      über diese Browser-Installation zugeordnet werden.
+      Für GitHub Login leiten wir dich zu GitHub weiter und erhalten nach deiner Freigabe einen kurzlebigen
+      Zugriffstoken, den wir nur zum Abruf deiner GitHub-Account-ID verwenden und danach verwerfen. Wir speichern
+      daraus eine interne User-ID, einen kryptografischen Hash des GitHub-Identifiers, den GitHub-Login-Namen,
+      den Account-Erstellungszeitpunkt, Session-Daten, Favoriten und Hashes persönlicher ProblemProof-Tokens.
+      Plaintext-Tokens werden nur einmal angezeigt und nicht gespeichert.
+    </p>
+    <p>
+      Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO für von dir angeforderte Account-Funktionen und Art. 6
+      Abs. 1 lit. f DSGVO für Missbrauchsschutz und die Integrität der Evidenzsignale.
     </p>
   </section>
 

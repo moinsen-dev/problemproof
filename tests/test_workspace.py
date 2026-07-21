@@ -92,6 +92,11 @@ class WorkspaceScriptTests(unittest.TestCase):
         )
         self.assertIn("publish requires --yes", result.stderr)
 
+    def test_publish_documents_personal_token_flag(self) -> None:
+        result = self.run_script("publish", "--help")
+        self.assertIn("--token", result.stdout)
+        self.assertIn("PROBLEMPROOF_TOKEN", result.stdout)
+
     def test_repo_gate_creates_unique_pre_repo_record(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             result = self.run_script(

@@ -114,10 +114,11 @@ python3 <skill-dir>/scripts/problemproof_workspace.py publish \
   --category "<category>" \
   --consequence "<observable consequence>" \
   --participant-id "<stable local participant id>" \
+  --token "<personal ProblemProof token>" \
   --yes
 ```
 
-`publish` sends `source=skill`. It must not include raw notes, secrets, private transcripts, or personal data about third parties.
+`publish` sends `source=skill`. Prefer `PROBLEMPROOF_TOKEN` over passing `--token` when shell history is persistent. It must not include raw notes, secrets, private transcripts, or personal data about third parties.
 
 ## 3. State and transitions
 

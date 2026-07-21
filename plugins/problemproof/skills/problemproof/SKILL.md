@@ -159,7 +159,8 @@ python3 <this-skill-dir>/scripts/problemproof_workspace.py publish \
   --category "<category>" \
   --consequence "<observable consequence>" \
   --participant-id "<stable local participant id>" \
+  --token "<personal ProblemProof token>" \
   --yes
 ```
 
-The default API target is `https://problemproof.moinsen.dev/api/problems`. Use `--api-url` for local or staging environments.
+The default API target is `https://problemproof.moinsen.dev/api/problems`. Use `--api-url` for local or staging environments. Prefer `PROBLEMPROOF_TOKEN` over writing tokens into shell history.

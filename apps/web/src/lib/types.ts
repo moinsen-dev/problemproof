@@ -24,10 +24,13 @@ export interface ProblemRow {
   incidents_count: number;
   average_severity: number | null;
   workarounds: string | null;
+  is_favorite: 0 | 1;
+  user_confirmed: 0 | 1;
+  user_incident: 0 | 1;
 }
 
 export interface FeedFilters {
-  mode: 'needs-proof' | 'new' | 'strong';
+  mode: 'needs-proof' | 'new' | 'strong' | 'favorites' | 'confirmed' | 'posted';
   search: string;
   region: string;
   targetGroup: string;

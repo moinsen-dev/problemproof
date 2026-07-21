@@ -596,6 +596,7 @@ def command_transition(args: argparse.Namespace) -> None:
 def command_publish(args: argparse.Namespace) -> None:
     if not args.yes:
         raise WorkspaceError("publish requires --yes after explicit user confirmation")
+    token = args.token or os.environ.get("PROBLEMPROOF_TOKEN", "")
     payload = {
         "statement": single_line(args.statement, "statement", maximum=280),
         "origin": args.origin,
@@ -606,13 +607,16 @@ def command_publish(args: argparse.Namespace) -> None:
         "participantId": single_line(args.participant_id, "participant ID", maximum=120),
         "source": "skill",
     }
+    headers = {
+        "content-type": "application/json",
+        "user-agent": "ProblemProofSkill/0.1 (+https://github.com/moinsen-dev/problemproof)",
+    }
+    if token:
+        headers["authorization"] = f"Bearer {token}"
     request = Request(
         args.api_url,
         data=json.dumps(payload).encode("utf-8"),
-        headers={
-            "content-type": "application/json",
-            "user-agent": "ProblemProofSkill/0.1 (+https://github.com/moinsen-dev/problemproof)",
-        },
+        headers=headers,
         method="POST",
     )
     try:
@@ -734,6 +738,7 @@ def build_parser() -> argparse.ArgumentParser:
     publish_parser.add_argument("--category", required=True)
     publish_parser.add_argument("--consequence", required=True)
     publish_parser.add_argument("--participant-id", required=True)
+    publish_parser.add_argument("--token", help="ProblemProof personal token; alternatively set PROBLEMPROOF_TOKEN")
     publish_parser.add_argument("--timeout-seconds", type=int, default=15)
     publish_parser.add_argument(
         "--yes",

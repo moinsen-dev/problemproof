@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
+import { bearerUser, currentUser } from '../../../lib/auth';
 import { json, readJson, requestError } from '../../../lib/http';
 import { getProblems } from '../../../lib/problems';
 import type { FeedFilters, Origin } from '../../../lib/types';
@@ -21,14 +22,19 @@ export const GET: APIRoute = async ({ url }) => {
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const parsed = parseProblemInput(await readJson(request));
+    const user = await currentUser(request, env.DB, env) ?? await bearerUser(request, env.DB, env);
+    if (!user) return json({ error: 'Bitte melde dich mit GitHub an.' }, { status: 401 });
+    const body = (await readJson(request)) as Record<string, unknown>;
+    body.participantId = `user:${user.id}`;
+    if (!body.source) body.source = request.headers.get('authorization') ? 'api' : 'web';
+    const parsed = parseProblemInput(body);
     if (!parsed.data) return json({ errors: parsed.errors }, { status: 422 });
     const input = parsed.data;
     const slug = `${slugify(input.statement)}-${crypto.randomUUID().slice(0, 8)}`;
     const result = await env.DB.prepare(`
       INSERT INTO problems
-        (slug, statement, origin, target_group, region, category, consequence, author_id, source)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (slug, statement, origin, target_group, region, category, consequence, author_id, source, user_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       slug,
       input.statement,
@@ -39,6 +45,7 @@ export const POST: APIRoute = async ({ request }) => {
       input.consequence,
       input.participantId,
       input.source,
+      user.id,
     ).run();
     return json({ id: result.meta.last_row_id, slug }, { status: 201 });
   } catch (error) {

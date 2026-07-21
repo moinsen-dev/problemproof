@@ -27,14 +27,18 @@ const reportUrl = `mailto:developer@moinsen.dev?subject=${encodeURIComponent(`Pr
       </div>
     )}
     <div class="problem-actions">
-      <button class="action-button signal-button" type="button" data-action="signal" aria-label="Bestätigen: selbst erlebt">
+      <button class:list={['action-button', 'favorite-button', problem.is_favorite && 'favorited']} type="button" data-action="favorite" aria-label="Problem merken">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.8 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.7l6.2-.9L12 3Z"/></svg>
+        <span>{problem.is_favorite ? 'Gemerkt' : 'Merken'}</span>
+      </button>
+      <button class:list={['action-button', 'signal-button', problem.user_confirmed && 'confirmed']} type="button" data-action="signal" aria-label="Bestätigen: selbst erlebt" disabled={Boolean(problem.user_confirmed)}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 12 3.2 3.2L17.5 8"/></svg>
-        <span>Selbst erlebt</span>
+        <span>{problem.user_confirmed ? 'Von dir bestätigt' : 'Selbst erlebt'}</span>
         <strong data-count="confirmations">{problem.confirmations_count}</strong>
       </button>
-      <button class="action-button" type="button" data-action="evidence">
+      <button class:list={['action-button', problem.user_incident && 'completed']} type="button" data-action="evidence" disabled={Boolean(problem.user_incident)}>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-        <span>Vorfall ergänzen</span>
+        <span>{problem.user_incident ? 'Vorfall ergänzt' : 'Vorfall ergänzen'}</span>
         <strong data-count="incidents">{problem.incidents_count}</strong>
       </button>
       <button class="action-button share-button" type="button" data-action="share">

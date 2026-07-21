@@ -87,9 +87,10 @@ Important states:
 
 ## Core System Behavior
 
-- Anonymous users can read but cannot create or validate content.
+- Anonymous users can read, filter, and inspect public aggregate data but cannot create, favorite, or validate content.
 - GitHub sign-in creates or resumes a private internal user from a stable provider subject.
 - A unique user/problem constraint permits one confirmation and one incident per internal user.
+- A signed-in user can favorite problems and view personal feed tabs for favorites, confirmed problems, and posted problems.
 - Public responses expose aggregate evidence and a generic authenticated-account badge, never provider subjects or access tokens.
 - A signed-in user can create a scoped ProblemProof token; only its cryptographic hash is stored.
 - The skill validates locally, presents the exact public payload, asks for confirmation, then publishes with that scoped token.
@@ -106,6 +107,7 @@ Important states:
 - Public repository readiness: license, security policy, contribution guide, CI, deployment documentation, and visible deployed commit SHA.
 - Private authentication: GitHub authorization-code flow with state and PKCE, minimal provider access, private session, and logout.
 - Account-backed evidence: user-linked problems, confirmations, and incidents with database uniqueness guarantees.
+- Personal feed state: favorites, confirmed problems, posted problems, and per-card personal interaction state.
 - Skill publishing: scoped personal token, payload preview, explicit publish confirmation, and source-channel attribution.
 - Trust UX: generic authenticated badge, personal vote state, clear limitations, and no public voter list.
 - Future identity linking: attach LinkedIn OIDC to an existing internal user without creating a second voting identity.

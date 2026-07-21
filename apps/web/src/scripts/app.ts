@@ -16,13 +16,14 @@ function getParticipantId() {
   return participantId;
 }
 
-const publishDialog = $('#publish-dialog') as HTMLDialogElement;
-const evidenceDialog = $('#evidence-dialog') as HTMLDialogElement;
-const publishForm = $('#publish-form') as HTMLFormElement;
-const evidenceForm = $('#evidence-form') as HTMLFormElement;
-const toast = $('.toast') as HTMLElement;
+const publishDialog = $('#publish-dialog') as HTMLDialogElement | null;
+const evidenceDialog = $('#evidence-dialog') as HTMLDialogElement | null;
+const publishForm = $('#publish-form') as HTMLFormElement | null;
+const evidenceForm = $('#evidence-form') as HTMLFormElement | null;
+const toast = $('.toast') as HTMLElement | null;
 
 function showToast(message: string) {
+  if (!toast) return;
   toast.textContent = message;
   toast.classList.add('visible');
   window.setTimeout(() => toast.classList.remove('visible'), 3200);
@@ -56,76 +57,92 @@ async function post(url: string, payload: Record<string, unknown>) {
   return data;
 }
 
-$$<HTMLElement>('[data-open-publish]').forEach((button) => button.addEventListener('click', () => publishDialog.showModal()));
+function authMessage(error: unknown) {
+  const data = (error as { data?: Record<string, unknown> }).data ?? {};
+  if (data.error === 'Bitte melde dich mit GitHub an.') return 'Bitte melde dich mit GitHub an.';
+  return '';
+}
+
+$$<HTMLElement>('[data-open-publish]').forEach((button) => button.addEventListener('click', () => publishDialog?.showModal()));
 $$<HTMLElement>('[data-close]').forEach((button) => button.addEventListener('click', () => (button.closest('dialog') as HTMLDialogElement).close()));
 $$<HTMLDialogElement>('dialog').forEach((dialog) => dialog.addEventListener('click', (event) => {
   if (event.target === dialog) dialog.close();
 }));
 
-const statement = $('textarea[name="statement"]', publishForm) as HTMLTextAreaElement;
-const count = $('#statement-count') as HTMLOutputElement;
-const solutionWarning = $('.solution-warning', publishForm) as HTMLElement;
-statement.addEventListener('input', () => {
-  count.textContent = String(statement.value.length);
-  const solutionTerms = /\b(app|software|plattform|dashboard|tool|ki|künstliche intelligenz|automatisierung)\b/i;
-  solutionWarning.hidden = !solutionTerms.test(statement.value);
-});
+if (publishForm && publishDialog) {
+  const statement = $('textarea[name="statement"]', publishForm) as HTMLTextAreaElement;
+  const count = $('#statement-count') as HTMLOutputElement;
+  const solutionWarning = $('.solution-warning', publishForm) as HTMLElement;
+  statement.addEventListener('input', () => {
+    count.textContent = String(statement.value.length);
+    const solutionTerms = /\b(app|software|plattform|dashboard|tool|ki|künstliche intelligenz|automatisierung)\b/i;
+    solutionWarning.hidden = !solutionTerms.test(statement.value);
+  });
 
-publishForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  setPending(publishForm, true);
-  ($('.form-message', publishForm) as HTMLElement).textContent = '';
-  try {
-    const values = formData(publishForm);
-    await post('/api/problems', { ...values, participantId: getParticipantId() });
-    publishDialog.close();
-    showToast('Problem veröffentlicht. Jetzt braucht es echte Vorfälle.');
-    window.setTimeout(() => window.location.reload(), 650);
-  } catch (error) {
-    setFormMessage(publishForm, (error as { data?: Record<string, unknown> }).data ?? {});
-  } finally {
-    setPending(publishForm, false);
-  }
-});
+  publishForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    setPending(publishForm, true);
+    ($('.form-message', publishForm) as HTMLElement).textContent = '';
+    try {
+      const values = formData(publishForm);
+      await post('/api/problems', { ...values, participantId: getParticipantId() });
+      publishDialog.close();
+      showToast('Problem veröffentlicht. Jetzt braucht es echte Vorfälle.');
+      window.setTimeout(() => window.location.reload(), 650);
+    } catch (error) {
+      const message = authMessage(error);
+      if (message) showToast(message);
+      setFormMessage(publishForm, (error as { data?: Record<string, unknown> }).data ?? {});
+    } finally {
+      setPending(publishForm, false);
+    }
+  });
+}
 
-const severity = $('input[name="severity"]', evidenceForm) as HTMLInputElement;
-const severityOutput = $('.severity-labels output', evidenceForm) as HTMLOutputElement;
-severity.addEventListener('input', () => { severityOutput.textContent = severity.value; });
+if (evidenceForm && evidenceDialog) {
+  const severity = $('input[name="severity"]', evidenceForm) as HTMLInputElement;
+  const severityOutput = $('.severity-labels output', evidenceForm) as HTMLOutputElement;
+  severity.addEventListener('input', () => { severityOutput.textContent = severity.value; });
 
-evidenceForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  setPending(evidenceForm, true);
-  ($('.form-message', evidenceForm) as HTMLElement).textContent = '';
-  try {
-    const values = formData(evidenceForm);
-    const problemId = values.problemId;
-    const result = await post(`/api/problems/${problemId}/evidence`, {
-      ...values,
-      severity: Number(values.severity),
-      ownExperience: new FormData(evidenceForm).has('ownExperience'),
-      participantId: getParticipantId(),
-    });
-    const card = $<HTMLElement>(`.problem[data-problem-id="${problemId}"]`);
-    const incidents = card && $<HTMLElement>('[data-count="incidents"]', card);
-    const confirmations = card && $<HTMLElement>('[data-count="confirmations"]', card);
-    if (incidents && typeof result.incidents === 'number') incidents.textContent = String(result.incidents);
-    if (confirmations && typeof result.confirmations === 'number') confirmations.textContent = String(result.confirmations);
-    evidenceDialog.close();
-    evidenceForm.reset();
-    severityOutput.textContent = '3';
-    showToast('Dein Vorfall wurde anonym ergänzt.');
-  } catch (error) {
-    setFormMessage(evidenceForm, (error as { data?: Record<string, unknown> }).data ?? {});
-  } finally {
-    setPending(evidenceForm, false);
-  }
-});
+  evidenceForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    setPending(evidenceForm, true);
+    ($('.form-message', evidenceForm) as HTMLElement).textContent = '';
+    try {
+      const values = formData(evidenceForm);
+      const problemId = values.problemId;
+      const result = await post(`/api/problems/${problemId}/evidence`, {
+        ...values,
+        severity: Number(values.severity),
+        ownExperience: new FormData(evidenceForm).has('ownExperience'),
+        participantId: getParticipantId(),
+      });
+      const card = $<HTMLElement>(`.problem[data-problem-id="${problemId}"]`);
+      const incidents = card && $<HTMLElement>('[data-count="incidents"]', card);
+      const confirmations = card && $<HTMLElement>('[data-count="confirmations"]', card);
+      if (incidents && typeof result.incidents === 'number') incidents.textContent = String(result.incidents);
+      if (confirmations && typeof result.confirmations === 'number') confirmations.textContent = String(result.confirmations);
+      evidenceDialog.close();
+      evidenceForm.reset();
+      severityOutput.textContent = '3';
+      showToast('Dein Vorfall wurde gespeichert.');
+      window.setTimeout(() => window.location.reload(), 650);
+    } catch (error) {
+      const message = authMessage(error);
+      if (message) showToast(message);
+      setFormMessage(evidenceForm, (error as { data?: Record<string, unknown> }).data ?? {});
+    } finally {
+      setPending(evidenceForm, false);
+    }
+  });
+}
 
 $$<HTMLElement>('[data-action="evidence"]').forEach((button) => button.addEventListener('click', () => {
+  if (!evidenceForm || !evidenceDialog) return;
   const card = button.closest<HTMLElement>('.problem');
   const problemInput = $('input[name="problemId"]', evidenceForm) as HTMLInputElement;
   problemInput.value = card?.dataset.problemId ?? '';
-  evidenceDialog.showModal();
+  evidenceDialog?.showModal();
 }));
 
 $$<HTMLButtonElement>('[data-action="signal"]').forEach((button) => button.addEventListener('click', async () => {
@@ -141,7 +158,30 @@ $$<HTMLButtonElement>('[data-action="signal"]').forEach((button) => button.addEv
     showToast('Bestätigt – du kennst dieses Problem selbst.');
   } catch {
     button.disabled = false;
-    showToast('Bestätigung konnte nicht gespeichert werden.');
+    showToast('Bitte melde dich mit GitHub an.');
+  }
+}));
+
+$$<HTMLButtonElement>('[data-action="favorite"]').forEach((button) => button.addEventListener('click', async () => {
+  const card = button.closest<HTMLElement>('.problem');
+  const problemId = card?.dataset.problemId;
+  if (!problemId || button.disabled) return;
+  button.disabled = true;
+  const enabled = !button.classList.contains('favorited');
+  try {
+    await fetch(`/api/problems/${problemId}/favorite`, { method: enabled ? 'POST' : 'DELETE' }).then(async (response) => {
+      const data = await response.json() as Record<string, unknown>;
+      if (!response.ok) throw Object.assign(new Error('REQUEST_FAILED'), { data });
+      return data;
+    });
+    button.classList.toggle('favorited', enabled);
+    const label = $('span', button) as HTMLElement;
+    label.textContent = enabled ? 'Gemerkt' : 'Merken';
+    showToast(enabled ? 'Problem gemerkt.' : 'Problem aus Favoriten entfernt.');
+  } catch {
+    showToast('Bitte melde dich mit GitHub an.');
+  } finally {
+    button.disabled = false;
   }
 }));
 
@@ -163,3 +203,22 @@ $$<HTMLButtonElement>('[data-action="share"]').forEach((button) => button.addEve
 $$<HTMLSelectElement>('[data-filter-form] select').forEach((select) => select.addEventListener('change', () => {
   (select.form as HTMLFormElement).requestSubmit();
 }));
+
+const tokenForm = $('[data-token-form]') as HTMLFormElement | null;
+if (tokenForm) {
+  tokenForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    setPending(tokenForm, true);
+    try {
+      const result = await post('/api/account/tokens', formData(tokenForm));
+      const target = $('[data-token-result]') as HTMLElement;
+      target.hidden = false;
+      target.textContent = `Token: ${result.token as string}`;
+      showToast('Skill-Token erzeugt. Er wird nur einmal angezeigt.');
+    } catch {
+      showToast('Token konnte nicht erzeugt werden.');
+    } finally {
+      setPending(tokenForm, false);
+    }
+  });
+}

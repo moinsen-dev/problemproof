@@ -12,15 +12,43 @@ Astro-Seite
   ├─ POST /api/problems           Problem veröffentlichen
   ├─ POST /api/problems/:id/signal
   ├─ POST /api/problems/:id/evidence
+  ├─ POST/DELETE /api/problems/:id/favorite
+  ├─ GET /auth/github             GitHub OAuth start
+  ├─ GET /auth/github/callback    GitHub OAuth callback
+  ├─ POST /auth/logout
+  ├─ GET /account/                private account and skill tokens
+  ├─ POST /api/account/tokens     create personal skill token
   └─ GET /api/v1/problems         nur aggregierte öffentliche Daten
                     │
                     └─ Cloudflare D1
                        ├─ problems
                        ├─ confirmations
-                       └─ evidence
+                       ├─ evidence
+                       ├─ users / identities / sessions
+                       ├─ favorites
+                       └─ personal_tokens
 ```
 
-`confirmations` speichert pro Problem und anonymer Teilnehmer-ID höchstens einen Datensatz. `evidence` verlangt einen konkreten eigenen Vorfall mit Zeitpunkt, Häufigkeit, Schweregrad, Geschichte, Region und optionalem Workaround.
+`confirmations` und `evidence` speichern pro Problem und internem Account höchstens einen Datensatz. Legacy-Daten mit anonymer Teilnehmer-ID bleiben lesbar. `evidence` verlangt einen konkreten eigenen Vorfall mit Zeitpunkt, Häufigkeit, Schweregrad, Geschichte, Region und optionalem Workaround.
+
+## GitHub Auth und Skill Tokens
+
+GitHub Login ist aktiv, sobald diese Cloudflare Worker-Secrets gesetzt sind:
+
+```bash
+npx wrangler secret put GITHUB_CLIENT_ID
+npx wrangler secret put GITHUB_CLIENT_SECRET
+npx wrangler secret put IDENTITY_HMAC_SECRET
+npx wrangler secret put SESSION_SECRET
+```
+
+GitHub OAuth App:
+
+- Homepage URL: `https://problemproof.moinsen.dev`
+- Callback URL: `https://problemproof.moinsen.dev/auth/github/callback`
+- Scopes: keine optionalen Scopes anfordern
+
+Skill-Publishing kann mit einem persönlichen ProblemProof-Token erfolgen, der unter `/account/` erzeugt wird. Der Token wird nur einmal angezeigt; gespeichert wird nur ein Hash.
 
 ## Lokal entwickeln
 

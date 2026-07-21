@@ -36,7 +36,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
   top: 0;
   min-height: 76px;
   display: grid;
-  grid-template-columns: 1fr minmax(280px, 490px) 1fr;
+  grid-template-columns: auto minmax(260px, 490px) auto auto;
   align-items: center;
   gap: 28px;
   padding: 14px clamp(24px, 5vw, 80px);
@@ -57,6 +57,12 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .search input { border: 0; outline: 0; width: 100%; color: var(--ink); background: transparent; }
 .search input::placeholder { color: #8993a3; }
 .header-cta { justify-self: end; }
+.account-box { justify-self: end; display: inline-flex; align-items: center; gap: 12px; min-width: max-content; }
+.account-link, .plain-link, .auth-offline { color: var(--muted); font-size: 13px; font-weight: 750; }
+.account-link:hover, .plain-link:hover { color: var(--ink); }
+.plain-link { border: 0; padding: 0; background: transparent; }
+.sign-in { min-height: 39px; padding: 0 13px; font-size: 13px; }
+.auth-offline { color: #8b95a5; }
 
 .button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 0 18px; border: 1px solid transparent; border-radius: 3px; font-weight: 700; transition: 150ms ease; }
 .button.primary { color: white; background: var(--blue); }
@@ -212,6 +218,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .signal-button { color: var(--green); border-color: #b8decf; background: #fbfffd; }
 .signal-button.confirmed { color: white; border-color: var(--green); background: var(--green); }
 .signal-button.confirmed strong { color: white; border-color: rgba(255,255,255,.3); }
+.favorite-button.favorited { color: var(--amber); border-color: #f1cf88; background: var(--amber-soft); }
+.action-button.completed { color: var(--blue); border-color: #bfd0ff; background: var(--blue-soft); }
 .share-button { border-color: transparent; margin-left: auto; }
 .report-button { border-color: transparent; color: var(--muted); }
 .report-button:hover { color: var(--danger); border-color: #f2c4bf; }
@@ -310,10 +318,22 @@ legend, .field > span:first-child { display: block; margin-bottom: 8px; color: #
 .privacy-id p { overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
 .privacy-id .button { margin-top: 6px; color: var(--ink); text-decoration: none; }
 
+.account-main { max-width: 960px; }
+.account-panel { padding: 34px 0 80px; }
+.account-panel h2 { margin: 0 0 13px; font-family: var(--serif); font-size: 34px; font-weight: 400; letter-spacing: -.03em; }
+.account-panel p { color: var(--muted); line-height: 1.62; }
+.token-form { display: grid; grid-template-columns: minmax(240px, 1fr) auto; gap: 12px; align-items: end; max-width: 720px; margin: 28px 0; }
+.token-result { max-width: 720px; margin: 0 0 28px; padding: 14px 15px; overflow-wrap: anywhere; border: 1px solid var(--line-dark); background: var(--soft); font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.token-list { display: grid; gap: 10px; max-width: 720px; }
+.token-list article { display: grid; gap: 4px; padding: 14px 15px; border: 1px solid var(--line); }
+.token-list article span { color: var(--muted); font-size: 12px; }
+
 @media (max-width: 800px) {
-  .site-header { min-height: 64px; grid-template-columns: 1fr auto; padding: 10px 18px; }
+  .site-header { min-height: 64px; grid-template-columns: 1fr auto auto; gap: 12px; padding: 10px 18px; }
   .search { grid-column: 1 / -1; grid-row: 2; height: 42px; }
   .header-cta { min-height: 40px; padding: 0 13px; font-size: 13px; }
+  .account-box { gap: 8px; }
+  .account-link { display: none; }
   .hero { display: block; padding: 58px 22px 52px; }
   .hero h1 { font-size: clamp(56px, 18vw, 78px); }
   .hero-copy { margin-top: 28px; font-size: 18px; }
@@ -352,12 +372,14 @@ legend, .field > span:first-child { display: block; margin-bottom: 8px; color: #
   .segmented.four { grid-template-columns: 1fr 1fr; gap: 6px; }
   .segmented span, .segmented label:first-child span, .segmented label:last-child span { margin: 0; border-radius: 3px; }
   .modal-actions { position: sticky; bottom: -21px; margin: 0 -20px -21px; padding: 14px 20px 18px; border-top: 1px solid var(--line); background: white; }
+  .token-form { grid-template-columns: 1fr; align-items: stretch; }
 }
 
 @media (max-width: 440px) {
   .brand { font-size: 17px; }
   .brand-mark { width: 23px; height: 23px; }
   .header-cta span { display: none; }
+  .sign-in { padding: 0 10px; }
   .hero h1 { font-size: 57px; }
   .workflow-steps { grid-template-columns: 1fr; }
   .workflow-steps article, .workflow-steps article:nth-child(2n) { min-height: 0; border-right: 0; border-bottom: 1px solid var(--line-dark); }

@@ -4,26 +4,31 @@ import EvidenceDialog from '../components/EvidenceDialog.astro';
 import ProblemCard from '../components/ProblemCard.astro';
 import PublishDialog from '../components/PublishDialog.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import { authConfig, currentUser } from '../lib/auth';
 import { getFilterOptions, getProblems } from '../lib/problems';
 import type { FeedFilters, Origin } from '../lib/types';
 import '../styles/global.css';
 
 const requestedMode = Astro.url.searchParams.get('mode');
 const requestedOrigin = Astro.url.searchParams.get('origin');
+const modeOptions = ['needs-proof', 'new', 'strong', 'favorites', 'confirmed', 'posted'] as const;
 const filters: FeedFilters = {
-  mode: requestedMode === 'new' || requestedMode === 'strong' ? requestedMode : 'needs-proof',
+  mode: modeOptions.includes(requestedMode as FeedFilters['mode']) ? (requestedMode as FeedFilters['mode']) : 'needs-proof',
   search: (Astro.url.searchParams.get('q') ?? '').slice(0, 120),
   region: (Astro.url.searchParams.get('region') ?? '').slice(0, 80),
   targetGroup: (Astro.url.searchParams.get('targetGroup') ?? '').slice(0, 80),
   category: (Astro.url.searchParams.get('category') ?? '').slice(0, 80),
   origin: requestedOrigin === 'firsthand' || requestedOrigin === 'hypothesis' ? (requestedOrigin as Origin) : '',
 };
-const [problems, options] = await Promise.all([getProblems(env.DB, filters), getFilterOptions(env.DB)]);
+const user = await currentUser(Astro.request, env.DB, env);
+const authReady = authConfig(env).enabled;
+const [problems, options] = await Promise.all([getProblems(env.DB, filters, user?.id ?? null), getFilterOptions(env.DB)]);
 const tabUrl = (mode: FeedFilters['mode']) => {
   const params = new URLSearchParams(Astro.url.searchParams);
   params.set('mode', mode);
   return `/?${params}`;
 };
+const loginUrl = `/auth/github?returnTo=${encodeURIComponent(`${Astro.url.pathname}${Astro.url.search}`)}`;
 ---
 
 <!doctype html>
@@ -49,6 +54,18 @@ const tabUrl = (mode: FeedFilters['mode']) => {
       <button class="button primary header-cta" type="button" data-open-publish>
         <span aria-hidden="true">＋</span> Problem posten
       </button>
+      <div class="account-box" data-authenticated={user ? 'true' : 'false'}>
+        {user ? (
+          <>
+            <a class="account-link" href="/account/">{user.displayName}</a>
+            <form method="post" action="/auth/logout"><button class="plain-link" type="submit">Logout</button></form>
+          </>
+        ) : authReady ? (
+          <a class="button secondary sign-in" href={loginUrl}>GitHub Login</a>
+        ) : (
+          <span class="auth-offline">Login bald aktiv</span>
+        )}
+      </div>
     </header>
 
     <main>
@@ -119,6 +136,9 @@ const tabUrl = (mode: FeedFilters['mode']) => {
           <a href={tabUrl('needs-proof')} aria-current={filters.mode === 'needs-proof' ? 'page' : undefined}>Needs Proof</a>
           <a href={tabUrl('new')} aria-current={filters.mode === 'new' ? 'page' : undefined}>Neu</a>
           <a href={tabUrl('strong')} aria-current={filters.mode === 'strong' ? 'page' : undefined}>Stark belegt</a>
+          <a href={tabUrl('favorites')} aria-current={filters.mode === 'favorites' ? 'page' : undefined}>Favoriten</a>
+          <a href={tabUrl('confirmed')} aria-current={filters.mode === 'confirmed' ? 'page' : undefined}>Bestätigt</a>
+          <a href={tabUrl('posted')} aria-current={filters.mode === 'posted' ? 'page' : undefined}>Gepostet</a>
         </nav>
 
         <form class="filters" method="get" action="/" data-filter-form>

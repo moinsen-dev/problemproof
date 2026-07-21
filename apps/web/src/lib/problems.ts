@@ -8,16 +8,29 @@ const SELECT_PROBLEMS = `
     COUNT(DISTINCT c.id) AS confirmations_count,
     COUNT(DISTINCT e.id) AS incidents_count,
     ROUND(AVG(e.severity), 1) AS average_severity,
-    GROUP_CONCAT(DISTINCT NULLIF(e.workaround, '')) AS workarounds
+    GROUP_CONCAT(DISTINCT NULLIF(e.workaround, '')) AS workarounds,
+    CASE WHEN ? IS NOT NULL AND EXISTS (
+      SELECT 1 FROM favorites f WHERE f.problem_id = p.id AND f.user_id = ?
+    ) THEN 1 ELSE 0 END AS is_favorite,
+    CASE WHEN ? IS NOT NULL AND EXISTS (
+      SELECT 1 FROM confirmations uc WHERE uc.problem_id = p.id AND uc.user_id = ?
+    ) THEN 1 ELSE 0 END AS user_confirmed,
+    CASE WHEN ? IS NOT NULL AND EXISTS (
+      SELECT 1 FROM evidence ue WHERE ue.problem_id = p.id AND ue.user_id = ?
+    ) THEN 1 ELSE 0 END AS user_incident
   FROM problems p
   LEFT JOIN confirmations c ON c.problem_id = p.id
   LEFT JOIN evidence e ON e.problem_id = p.id`;
 
-export async function getProblems(db: D1Database, filters: FeedFilters): Promise<ProblemRow[]> {
+export async function getProblems(db: D1Database, filters: FeedFilters, userId: number | null = null): Promise<ProblemRow[]> {
   const where: string[] = [];
-  const values: unknown[] = [];
+  const values: unknown[] = [userId, userId, userId, userId, userId, userId];
   if (filters.mode === 'needs-proof') where.push("p.proof_status = 'needs-proof'");
   if (filters.mode === 'strong') where.push("p.proof_status = 'strong'");
+  if (filters.mode === 'favorites') where.push('p.id IN (SELECT problem_id FROM favorites WHERE user_id = ?)');
+  if (filters.mode === 'confirmed') where.push('p.id IN (SELECT problem_id FROM confirmations WHERE user_id = ?)');
+  if (filters.mode === 'posted') where.push('p.user_id = ?');
+  if (filters.mode === 'favorites' || filters.mode === 'confirmed' || filters.mode === 'posted') values.push(userId ?? -1);
   if (filters.search) {
     where.push('(p.statement LIKE ? OR p.target_group LIKE ? OR p.category LIKE ?)');
     const needle = `%${filters.search}%`;

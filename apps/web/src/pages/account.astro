@@ -1,0 +1,81 @@
+---
+import { env } from 'cloudflare:workers';
+import SiteFooter from '../components/SiteFooter.astro';
+import { authConfig, currentUser } from '../lib/auth';
+import '../styles/global.css';
+
+const user = await currentUser(Astro.request, env.DB, env);
+const authReady = authConfig(env).enabled;
+const loginUrl = `/auth/github?returnTo=${encodeURIComponent('/account/')}`;
+const tokens = user ? await env.DB.prepare(`
+  SELECT name, created_at, last_used_at, revoked_at
+  FROM personal_tokens
+  WHERE user_id = ?
+  ORDER BY created_at DESC
+  LIMIT 20
+`).bind(user.id).all<{ name: string; created_at: string; last_used_at: string | null; revoked_at: string | null }>() : null;
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Account – ProblemProof</title>
+  </head>
+  <body>
+    <header class="site-header legal-header">
+      <a class="brand" href="/" aria-label="ProblemProof Startseite">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span>ProblemProof</span>
+      </a>
+      <a class="back-link" href="/">Zurück zum Feed</a>
+    </header>
+
+    <main class="legal-main account-main">
+      <section class="legal-title">
+        <p class="section-kicker">Account</p>
+        <h1>Private Teilnahme</h1>
+        <p>Favoriten, eigene Bestätigungen und Skill-Tokens hängen an deinem privaten ProblemProof-Account.</p>
+      </section>
+
+      {user ? (
+        <section class="account-panel">
+          <h2>{user.displayName}</h2>
+          <p>Öffentlich erscheint keine Voterliste und kein GitHub-Profil. ProblemProof nutzt den Account, um doppelte Interaktionen zu verhindern.</p>
+
+          <form class="token-form" data-token-form>
+            <label class="field">
+              <span>Token-Name</span>
+              <input name="name" maxlength="80" value="ProblemProof Skill" />
+            </label>
+            <button class="button primary" type="submit">Skill-Token erzeugen</button>
+          </form>
+          <div class="token-result" data-token-result hidden></div>
+
+          <h2>Tokens</h2>
+          <div class="token-list">
+            {(tokens?.results ?? []).length ? tokens?.results.map((token) => (
+              <article>
+                <strong>{token.name}</strong>
+                <span>Erstellt: {token.created_at}</span>
+                <span>Zuletzt genutzt: {token.last_used_at ?? 'noch nie'}</span>
+              </article>
+            )) : <p>Noch keine Tokens.</p>}
+          </div>
+        </section>
+      ) : (
+        <section class="account-panel">
+          <h2>Login erforderlich</h2>
+          <p>{authReady ? 'Melde dich mit GitHub an, um Favoriten und Skill-Tokens zu nutzen.' : 'GitHub Login ist im Deployment noch nicht konfiguriert.'}</p>
+          {authReady && <a class="button primary" href={loginUrl}>Mit GitHub anmelden</a>}
+        </section>
+      )}
+    </main>
+
+    <SiteFooter />
+    <div class="toast" role="status" aria-live="polite"></div>
+    <script src="../scripts/app.ts"></script>
+  </body>
+</html>

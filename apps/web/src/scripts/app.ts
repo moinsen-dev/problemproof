@@ -198,6 +198,57 @@ $$<HTMLButtonElement>('[data-action="favorite"]').forEach((button) => button.add
   }
 }));
 
+const proofCards = $$<HTMLElement>('[data-proof-card]');
+const proofProgress = $('[data-proof-progress]') as HTMLElement | null;
+let proofIndex = proofCards.findIndex((card) => card.classList.contains('active'));
+if (proofIndex < 0) proofIndex = 0;
+
+function updateProofProgress() {
+  if (!proofProgress || !proofCards.length) return;
+  proofProgress.textContent = proofIndex >= proofCards.length ? `Fertig/${proofCards.length}` : `${proofIndex + 1}/${proofCards.length}`;
+}
+
+function advanceProof(card: HTMLElement, className: string) {
+  card.classList.remove('active');
+  card.classList.add(className);
+  proofIndex += 1;
+  const next = proofCards[proofIndex];
+  if (next) {
+    next.classList.add('active');
+  } else {
+    $<HTMLElement>('[data-proof-shell]')?.classList.add('finished');
+    showToast('Proof Feed durch. Öffne die Datenbank für weitere Probleme.');
+  }
+  updateProofProgress();
+}
+
+$$<HTMLButtonElement>('[data-action="proof-no"]').forEach((button) => button.addEventListener('click', () => {
+  const card = button.closest<HTMLElement>('[data-proof-card]');
+  if (!card) return;
+  advanceProof(card, 'skipped');
+}));
+
+$$<HTMLButtonElement>('[data-action="proof-yes"]').forEach((button) => button.addEventListener('click', async () => {
+  const card = button.closest<HTMLElement>('[data-proof-card]');
+  const problemId = card?.dataset.problemId;
+  if (!card || !problemId || button.disabled) return;
+  button.disabled = true;
+  try {
+    const result = await post(`/api/problems/${problemId}/signal`, { participantId: getParticipantId(), region: '' });
+    const target = $<HTMLElement>('[data-count="confirmations"]', card);
+    if (target && typeof result.confirmations === 'number') target.textContent = String(result.confirmations);
+    button.textContent = 'Bestätigt';
+    showToast('Bestätigt – nächstes Problem.');
+    window.setTimeout(() => advanceProof(card, 'confirmed-card'), 220);
+  } catch (error) {
+    button.disabled = false;
+    const message = authMessage(error);
+    showToast(message || 'Bestätigung konnte nicht gespeichert werden.');
+  }
+}));
+
+updateProofProgress();
+
 $$<HTMLButtonElement>('[data-action="share"]').forEach((button) => button.addEventListener('click', async () => {
   const card = button.closest<HTMLElement>('.problem');
   const problemId = card?.dataset.problemId;

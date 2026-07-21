@@ -72,7 +72,13 @@ const loginUrl = `/auth/github?returnTo=${encodeURIComponent(`${Astro.url.pathna
       <section class="hero">
         <p class="hero-kicker">Bevor du die nächste Lösung baust</p>
         <h1>Ist das wirklich<br/>ein Problem?</h1>
-        <p class="hero-copy">Formuliere es klar. Lass Menschen konkrete Vorfälle ergänzen. Entscheide mit Evidenz statt mit Bauchgefühl.</p>
+        <div class="hero-side">
+          <p class="hero-copy">Formuliere es klar. Lass Menschen konkrete Vorfälle ergänzen. Entscheide mit Evidenz statt mit Bauchgefühl.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="/problems/">Problem-Datenbank</a>
+            <a class="button secondary" href="/proof/">Mobile Proof Feed</a>
+          </div>
+        </div>
       </section>
 
       <section class="workflow" aria-labelledby="workflow-heading">
@@ -128,6 +134,7 @@ const loginUrl = `/auth/github?returnTo=${encodeURIComponent(`${Astro.url.pathna
           <div>
             <p class="section-kicker">Öffentliche Problem-Datenbank</p>
             <h2 id="feed-heading">Probleme, die Belege brauchen</h2>
+            <p class="feed-subtitle">Der Startseitenfeed zeigt die wichtigsten Signale. Die vollständige Datenbank findest du unter <a href="/problems/">/problems</a>.</p>
           </div>
           <span class="result-count">{problems.length} {problems.length === 1 ? 'Problem' : 'Probleme'}</span>
         </div>

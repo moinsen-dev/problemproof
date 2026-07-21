@@ -1,0 +1,102 @@
+---
+import { env } from 'cloudflare:workers';
+import SiteFooter from '../components/SiteFooter.astro';
+import { authConfig, currentUser } from '../lib/auth';
+import { getProblems, validationLabel } from '../lib/problems';
+import type { FeedFilters } from '../lib/types';
+import '../styles/global.css';
+
+const user = await currentUser(Astro.request, env.DB, env);
+const authReady = authConfig(env).enabled;
+const startId = Number(Astro.url.searchParams.get('start') ?? 0);
+const filters: FeedFilters = {
+  mode: 'new',
+  search: '',
+  region: '',
+  targetGroup: '',
+  category: '',
+  origin: '',
+};
+const allProblems = await getProblems(env.DB, filters, user?.id ?? null);
+const startIndex = Number.isInteger(startId) && startId > 0 ? allProblems.findIndex((problem) => problem.id === startId) : -1;
+const problems = startIndex > 0 ? [...allProblems.slice(startIndex), ...allProblems.slice(0, startIndex)] : allProblems;
+const loginUrl = `/auth/github?returnTo=${encodeURIComponent(`${Astro.url.pathname}${Astro.url.search}`)}`;
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content="Der mobile ProblemProof Feed macht Problemvalidierung schnell: Ja, habe ich – oder weiter zum nächsten Problem." />
+    <meta name="theme-color" content="#111827" />
+    <title>Mobile Proof Feed – ProblemProof</title>
+  </head>
+  <body class="proof-page">
+    <header class="proof-header">
+      <a class="brand" href="/" aria-label="ProblemProof Startseite">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span>ProblemProof</span>
+      </a>
+      <nav class="page-nav" aria-label="ProblemProof Bereiche">
+        <a href="/problems/">Datenbank</a>
+        {user ? <a href="/account/">{user.displayName}</a> : authReady ? <a href={loginUrl}>Login</a> : null}
+      </nav>
+    </header>
+
+    <main class="proof-main">
+      <section class="proof-intro">
+        <p class="section-kicker">Proof Feed</p>
+        <h1>Hast du dieses Problem?</h1>
+        <p>Ein Problem pro Screen. Bestätige nur, was du selbst erlebt hast. Alles andere überspringst du.</p>
+      </section>
+
+      <section class="proof-shell" aria-label="Mobile Problemprüfung" data-proof-shell>
+        <div class="proof-progress">
+          <span data-proof-progress>1/{Math.max(problems.length, 1)}</span>
+          <a href="/problems/">Datenbank öffnen</a>
+        </div>
+
+        <div class="proof-stack">
+          {problems.length ? problems.map((problem, index) => (
+            <article class:list={['proof-card', index === 0 && 'active']} data-proof-card data-problem-id={problem.id} data-index={index}>
+              <div class="proof-card-top">
+                <span class="validation-pill">{validationLabel(problem)}</span>
+                <span>{problem.region}</span>
+              </div>
+              <h2>{problem.title}</h2>
+              <p class="proof-statement">{problem.statement}</p>
+              <p class="proof-consequence">{problem.consequence}</p>
+              <dl class="proof-mini-metrics">
+                <div><dt>Ja</dt><dd data-count="confirmations">{problem.confirmations_count}</dd></div>
+                <div><dt>Vorfälle</dt><dd>{problem.incidents_count}</dd></div>
+                <div><dt>Shares</dt><dd>{problem.shares_count}</dd></div>
+              </dl>
+              <div class="proof-card-meta">
+                <span>{problem.target_group}</span>
+                <span>{problem.category}</span>
+              </div>
+              <div class="proof-actions">
+                <button class="proof-no" type="button" data-action="proof-no">Nicht mein Problem</button>
+                <button class="proof-yes" type="button" data-action="proof-yes" disabled={Boolean(problem.user_confirmed)}>
+                  {problem.user_confirmed ? 'Schon bestätigt' : 'Ja, habe ich'}
+                </button>
+              </div>
+              <a class="proof-detail-link" href={`/problems/${problem.slug}`}>Details und Vorfälle ansehen</a>
+            </article>
+          )) : (
+            <div class="empty-state">
+              <p class="section-kicker">Leer</p>
+              <h2>Keine Probleme im Feed.</h2>
+              <p>Poste ein Problem oder schau später wieder rein.</p>
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
+
+    <SiteFooter />
+    <div class="toast" role="status" aria-live="polite"></div>
+    <script src="../scripts/app.ts"></script>
+  </body>
+</html>

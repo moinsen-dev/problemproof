@@ -1,0 +1,141 @@
+---
+import { env } from 'cloudflare:workers';
+import PublishDialog from '../../components/PublishDialog.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import { authConfig, currentUser } from '../../lib/auth';
+import { getFilterOptions, getProblems, validationLabel } from '../../lib/problems';
+import type { FeedFilters, Origin } from '../../lib/types';
+import '../../styles/global.css';
+
+const requestedMode = Astro.url.searchParams.get('mode');
+const requestedOrigin = Astro.url.searchParams.get('origin');
+const modeOptions = ['needs-proof', 'new', 'strong', 'favorites', 'confirmed', 'posted'] as const;
+const filters: FeedFilters = {
+  mode: modeOptions.includes(requestedMode as FeedFilters['mode']) ? (requestedMode as FeedFilters['mode']) : 'new',
+  search: (Astro.url.searchParams.get('q') ?? '').slice(0, 120),
+  region: (Astro.url.searchParams.get('region') ?? '').slice(0, 80),
+  targetGroup: (Astro.url.searchParams.get('targetGroup') ?? '').slice(0, 80),
+  category: (Astro.url.searchParams.get('category') ?? '').slice(0, 80),
+  origin: requestedOrigin === 'firsthand' || requestedOrigin === 'hypothesis' ? (requestedOrigin as Origin) : '',
+};
+const user = await currentUser(Astro.request, env.DB, env);
+const authReady = authConfig(env).enabled;
+const [problems, options] = await Promise.all([getProblems(env.DB, filters, user?.id ?? null), getFilterOptions(env.DB)]);
+const loginUrl = `/auth/github?returnTo=${encodeURIComponent(`${Astro.url.pathname}${Astro.url.search}`)}`;
+const modeUrl = (mode: FeedFilters['mode']) => {
+  const params = new URLSearchParams(Astro.url.searchParams);
+  params.set('mode', mode);
+  return `/problems/?${params}`;
+};
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content="Die ProblemProof Datenbank zeigt öffentliche Probleme mit Validierungsstand, Zielgruppe, Region und aggregierten Signalen." />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Problem-Datenbank – ProblemProof</title>
+  </head>
+  <body>
+    <header class="site-header legal-header">
+      <a class="brand" href="/" aria-label="ProblemProof Startseite">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span>ProblemProof</span>
+      </a>
+      <nav class="page-nav" aria-label="ProblemProof Bereiche">
+        <a href="/">Start</a>
+        <a href="/proof/">Proof Feed</a>
+        {user ? <a href="/account/">{user.displayName}</a> : authReady ? <a href={loginUrl}>GitHub Login</a> : null}
+      </nav>
+    </header>
+
+    <main class="database-main">
+      <section class="database-hero">
+        <p class="section-kicker">Problem-Datenbank</p>
+        <h1>Alle echten Probleme auf einen Blick.</h1>
+        <p>Filtere nach Zielgruppe, Region und Kategorie. Öffne Detailseiten oder wechsel in den mobilen Proof Feed, wenn du schnell Probleme bestätigen willst.</p>
+        <div class="detail-actions">
+          <button class="button primary" type="button" data-open-publish>Problem posten</button>
+          <a class="button secondary" href="/proof/">Als Proof Feed prüfen</a>
+        </div>
+      </section>
+
+      <section class="database-shell" aria-labelledby="database-heading">
+        <div class="database-toolbar">
+          <div>
+            <p class="section-kicker">Datensicht</p>
+            <h2 id="database-heading">{problems.length} {problems.length === 1 ? 'Problem' : 'Probleme'}</h2>
+          </div>
+          <form class="database-search" method="get" action="/problems/">
+            <input type="hidden" name="mode" value={filters.mode} />
+            <input type="search" name="q" value={filters.search} placeholder="Titel, Problem, Zielgruppe suchen" aria-label="Problem-Datenbank durchsuchen" />
+            <button class="button secondary" type="submit">Suchen</button>
+          </form>
+        </div>
+
+        <nav class="tabs" aria-label="Datenbank sortieren">
+          <a href={modeUrl('new')} aria-current={filters.mode === 'new' ? 'page' : undefined}>Neu</a>
+          <a href={modeUrl('needs-proof')} aria-current={filters.mode === 'needs-proof' ? 'page' : undefined}>Needs Proof</a>
+          <a href={modeUrl('strong')} aria-current={filters.mode === 'strong' ? 'page' : undefined}>Stark belegt</a>
+          <a href={modeUrl('favorites')} aria-current={filters.mode === 'favorites' ? 'page' : undefined}>Favoriten</a>
+          <a href={modeUrl('confirmed')} aria-current={filters.mode === 'confirmed' ? 'page' : undefined}>Bestätigt</a>
+          <a href={modeUrl('posted')} aria-current={filters.mode === 'posted' ? 'page' : undefined}>Gepostet</a>
+        </nav>
+
+        <form class="filters" method="get" action="/problems/" data-filter-form>
+          <input type="hidden" name="mode" value={filters.mode} />
+          {filters.search && <input type="hidden" name="q" value={filters.search} />}
+          <label><span>Region</span><select name="region"><option value="">Alle Regionen</option>{options.regions.map((value) => <option value={value} selected={filters.region === value}>{value}</option>)}</select></label>
+          <label><span>Zielgruppe</span><select name="targetGroup"><option value="">Alle Zielgruppen</option>{options.groups.map((value) => <option value={value} selected={filters.targetGroup === value}>{value}</option>)}</select></label>
+          <label><span>Kategorie</span><select name="category"><option value="">Alle Kategorien</option>{options.categories.map((value) => <option value={value} selected={filters.category === value}>{value}</option>)}</select></label>
+          <label><span>Ursprung</span><select name="origin"><option value="">Jeder Ursprung</option><option value="firsthand" selected={filters.origin === 'firsthand'}>Selbst erlebt</option><option value="hypothesis" selected={filters.origin === 'hypothesis'}>Hypothese</option></select></label>
+        </form>
+
+        <div class="database-table" role="table" aria-label="Problem-Datenbank">
+          <div class="database-row database-head" role="row">
+            <span role="columnheader">Problem</span>
+            <span role="columnheader">Segment</span>
+            <span role="columnheader">Signale</span>
+            <span role="columnheader">Aktion</span>
+          </div>
+          {problems.length ? problems.map((problem) => (
+            <article class="database-row" role="row">
+              <div role="cell" class="database-problem">
+                <span class="validation-pill">{validationLabel(problem)}</span>
+                <h3><a href={`/problems/${problem.slug}`}>{problem.title}</a></h3>
+                <p>{problem.statement}</p>
+              </div>
+              <div role="cell" class="database-segment">
+                <strong>{problem.target_group}</strong>
+                <span>{problem.region} · {problem.category}</span>
+              </div>
+              <dl role="cell" class="database-metrics">
+                <div><dt>Views</dt><dd>{problem.views_count}</dd></div>
+                <div><dt>Shares</dt><dd>{problem.shares_count}</dd></div>
+                <div><dt>Ja</dt><dd>{problem.confirmations_count}</dd></div>
+                <div><dt>Vorfälle</dt><dd>{problem.incidents_count}</dd></div>
+              </dl>
+              <div role="cell" class="database-actions">
+                <a class="button secondary" href={`/problems/${problem.slug}`}>Details</a>
+                <a class="button primary" href={`/proof/?start=${problem.id}`}>Prüfen</a>
+              </div>
+            </article>
+          )) : (
+            <div class="empty-state">
+              <p class="section-kicker">Noch kein Treffer</p>
+              <h2>Keine Probleme in dieser Sicht.</h2>
+              <p>Ändere die Filter oder poste ein neues Problem.</p>
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
+
+    <SiteFooter />
+    <PublishDialog />
+    <div class="toast" role="status" aria-live="polite"></div>
+    <script src="../../scripts/app.ts"></script>
+  </body>
+</html>

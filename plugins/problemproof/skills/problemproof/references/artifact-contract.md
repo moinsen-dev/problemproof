@@ -19,6 +19,7 @@ problem-proof/
 ├── idea.md
 ├── assumptions.md
 ├── evidence.md
+├── hypotheses.md
 ├── interviews.md
 ├── alternatives.md
 ├── experiments.md
@@ -224,6 +225,7 @@ The script records gate, decision, and transition events automatically. Append s
 - `idea.md`: trigger, observation, proposed solution, solution-free problem, personal relevance, assumed segment, evidence summary, open questions, and earliest reassessment date.
 - `assumptions.md`: assumption ID, falsifiable statement, type, status, evidence IDs, falsifier, and dates.
 - `evidence.md`: evidence ID, date, source, segment/situation, type, direction, observation, independence, limitations, and linked claims.
+- `hypotheses.md`: value hypothesis, growth hypothesis, riskiest assumption, metric contract, threshold, status, evidence IDs, and decision impact.
 - `interviews.md`: anonymized interview ID, segment fit, recent incident, current behavior, consequence, direct language, commitments, contradictions, and follow-up.
 - `alternatives.md`: direct, indirect, manual, professional, avoidance, and non-consumption alternatives; include switching cost and observed satisfaction.
 - `experiments.md`: hypothesis, segment, method, time/spend cap, thresholds fixed in advance, result, evidence IDs, and decision.

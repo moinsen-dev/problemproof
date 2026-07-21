@@ -1,13 +1,13 @@
 ---
 name: problemproof
-description: Evidence-gated problem validation and opportunity shaping for product, software, service, and non-software ideas. Use when a user wants to capture, park, validate, challenge, score, compare, research, or decide whether to build an idea; design a cheap demand experiment; distinguish a personal tool from a market product; run a pre-repository gate before creating a repo, PRD, project scaffold, or implementation; or shape a sufficiently validated problem into a focused opportunity.
+description: Evidence-gated problem validation, Lean Startup validated-learning experiment design, and opportunity shaping for product, software, service, and non-software ideas. Use when a user wants to capture, park, validate, challenge, score, compare, research, formulate value/growth hypotheses, design a minimum viable learning experiment or MVP, run a Build-Measure-Learn loop, decide whether to build an idea, distinguish a personal tool from a market product, run a pre-repository gate before creating a repo, PRD, project scaffold, or implementation, or shape a sufficiently validated problem into a focused opportunity.
 ---
 
 # ProblemProof
 
 Protect the user's time by determining whether a relevant problem exists before helping build a product. Treat technical feasibility, novelty, and personal usefulness as distinct from market evidence. Optimize for better decisions and early invalidation, not for producing more projects.
 
-Default to Problem Validation. Enter Opportunity Shaping only after the evidence gate passes and the user explicitly asks to continue.
+Default to Problem Validation. Use Lean Startup / Validated Learning as an experiment layer, not as permission to build. Enter Opportunity Shaping only after the evidence gate passes and the user explicitly asks to continue.
 
 ## Route the request
 
@@ -20,6 +20,9 @@ Interpret `$problemproof <intent>` and equivalent natural language. Use these in
 - `challenge`: Make the strongest evidence-based case that the idea may fail.
 - `evidence`: Inventory supporting, contradicting, and missing evidence.
 - `experiment`: Design the cheapest decisive validation experiment.
+- `hypotheses`: Formulate value and growth hypotheses, plus the riskiest assumption, while keeping the problem gate visible.
+- `mvp`: Design the smallest minimum viable learning artifact, not a full product, to test one critical assumption.
+- `loop`: Plan a Build-Measure-Learn cycle with metrics, thresholds, and a pivot/persevere decision.
 - `score`: Produce the transparent 12-dimension scorecard.
 - `shape`: Run Opportunity Shaping only if the evidence gate has passed.
 - `compare`: Compare ideas by problem quality and evidence, never implementation excitement.
@@ -36,7 +39,8 @@ If the intent is ambiguous, capture the idea and ask one focused question that m
 
 ## Load the required guidance
 
-- Read `references/framework.md` completely before `validate`, `challenge`, `evidence`, `experiment`, `score`, `compare`, `decision`, or `shape`.
+- Read `references/framework.md` completely before `validate`, `challenge`, `evidence`, `experiment`, `hypotheses`, `mvp`, `loop`, `score`, `compare`, `decision`, or `shape`.
+- Read `references/lean-startup.md` completely before `experiment`, `hypotheses`, `mvp`, or `loop`.
 - Read `references/artifact-contract.md` completely before creating or updating persistent artifacts.
 - Read `references/report-templates.md` completely before producing a full validation or opportunity-shaping report.
 
@@ -52,6 +56,8 @@ If the intent is ambiguous, capture the idea and ask one focused question that m
 - Ask one focused question at a time when information is missing. Prefer the question with the highest expected information gain.
 - Summarize learned facts, live assumptions, and decisive unknowns after each conversational phase.
 - Do not recommend a full application as the first experiment.
+- Treat an MVP as a learning instrument, not the first version of a product.
+- Do not run Lean Startup theater: every MVP or loop must name the hypothesis, metric, threshold, and decision it can change.
 - Do not publish anything publicly without explicit user confirmation in the current conversation.
 - Do not create a repository, PRD, project scaffold, or implementation for a new idea until the repo-start gate has run and a ProblemProof decision is recorded.
 - Define stop, narrow, or reframe criteria before running an experiment.
@@ -71,7 +77,7 @@ Do not say “Great idea,” “This has huge potential,” “Users will love t
 7. Score every required dimension with confidence, evidence IDs, assumptions, and unknowns. Never calculate an aggregate score.
 8. State the strongest argument for and against the product.
 9. Identify the few assumptions that could kill the opportunity.
-10. Design the cheapest experiment capable of changing the decision. Define success, ambiguous, and stop thresholds in advance.
+10. Design the cheapest experiment capable of changing the decision. Use Validated Learning when useful: state value/growth hypotheses, the riskiest assumption, MVP artifact, actionable metric, success/ambiguous/failure thresholds, and pivot/persevere/stop decision.
 11. Produce one explicit recommendation and the next evidence-producing action.
 
 When context is insufficient for a full report, do not fabricate completeness. Mark unknown scores as `0` with low confidence and evidence direction `unknown`, explain that `0` means unproven rather than disproven, and ask the next focused question.
@@ -81,6 +87,21 @@ When context is insufficient for a full report, do not fabricate completeness. M
 Allow the lifecycle to become `opportunity-ready` only when every gate item in `references/framework.md` passes with a written rationale. Default external-pattern evidence to at least three independent target users with recent concrete incidents plus at least one observed behavioral or transactional signal. Permit a documented exception for rare, high-severity, or concentrated-buyer problems; never waive the need for external evidence.
 
 If the gate fails, refuse `shape` as premature, name the failing items, and return to the smallest experiment that could resolve them. If the gate passes, state that shaping is justified but wait for the user's explicit direction before changing modes.
+
+## Run Validated Learning
+
+Use this layer to clarify or test the evidence gate before shaping. Do not let value/growth hypotheses distract from whether the problem exists.
+
+1. Restate the current problem-gate status and unresolved gate items.
+2. Formulate one value hypothesis: what value users should experience or behavior should change if the problem is real.
+3. Formulate one growth hypothesis only if the segment and initial channel are narrow enough to test.
+4. Identify the riskiest assumption that could invalidate demand, adoption, reachability, or payment.
+5. Select the smallest MVP artifact from the ladder in `references/lean-startup.md`.
+6. Define one primary actionable metric and a small set of guardrail metrics. Reject vanity metrics as primary evidence.
+7. Set success, ambiguous, and failure thresholds before collecting data.
+8. End with a decision rule: stop, narrow, reframe, pivot, persevere with another experiment, or proceed to opportunity shaping if the evidence gate passes.
+
+If the requested MVP would require a full app, reduce it to a fake door, landing page, concierge/manual service, prototype of one adoption-critical behavior, or paid commitment test unless the user explicitly classifies the work as personal or learning.
 
 ## Run Opportunity Shaping
 

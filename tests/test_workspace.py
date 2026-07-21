@@ -55,6 +55,9 @@ class WorkspaceScriptTests(unittest.TestCase):
             state = json.loads((project / "state.json").read_text(encoding="utf-8"))
             self.assertEqual(state["stage"], "captured")
             self.assertEqual(len(state["gate"]), 7)
+            self.assertTrue((project / "hypotheses.md").is_file())
+            hypotheses = (project / "hypotheses.md").read_text(encoding="utf-8")
+            self.assertIn("Validated Learning hypotheses", hypotheses)
             scorecard = json.loads(
                 (project / "scorecard.json").read_text(encoding="utf-8")
             )

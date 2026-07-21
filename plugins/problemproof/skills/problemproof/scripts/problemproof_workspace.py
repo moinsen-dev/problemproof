@@ -28,6 +28,7 @@ PROJECT_FILES = (
     "idea.md",
     "assumptions.md",
     "evidence.md",
+    "hypotheses.md",
     "interviews.md",
     "alternatives.md",
     "experiments.md",
@@ -245,6 +246,8 @@ def remote_problem_snapshot(problem: dict[str, Any], site_url: str) -> dict[str,
             "views": problem.get("views", 0),
             "shares": problem.get("shares", 0),
             "confirmations": problem.get("confirmations", 0),
+            "notMyProblem": problem.get("notMyProblem", 0),
+            "skips": problem.get("skips", 0),
             "incidents": problem.get("incidents", 0),
             "averageSeverity": problem.get("averageSeverity"),
         },
@@ -280,6 +283,8 @@ def print_remote_problem(problem: dict[str, Any]) -> None:
     print(f"Views: {problem.get('views', 0)}")
     print(f"Shares: {problem.get('shares', 0)}")
     print(f"Confirmations: {problem.get('confirmations', 0)}")
+    print(f"Not my problem: {problem.get('notMyProblem', 0)}")
+    print(f"Skips: {problem.get('skips', 0)}")
     print(f"Incidents: {problem.get('incidents', 0)}")
 
 
@@ -450,6 +455,13 @@ Not yet established.
         "evidence.md": """# Evidence ledger
 
 | ID | Date | Source | Segment and situation | Type | Direction | Observation | Independent? | Limitations | Linked claims |
+|---|---|---|---|---|---|---|---|---|---|
+""",
+        "hypotheses.md": """# Validated Learning hypotheses
+
+Use this file for Lean Startup hypotheses after the problem is solution-free. Keep each row falsifiable and tied to the ProblemProof evidence gate.
+
+| ID | Type | Hypothesis | Segment | Metric | Success threshold | Failure threshold | Status | Evidence IDs | Decision impact |
 |---|---|---|---|---|---|---|---|---|---|
 """,
         "interviews.md": """# Interviews

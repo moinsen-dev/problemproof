@@ -1,4 +1,4 @@
 interface:
   display_name: "ProblemProof"
-  short_description: "Gate ideas before repos and validate problems"
-  default_prompt: "Use $problemproof repo-gate before starting a new repo or build."
+  short_description: "Gate ideas and design Lean validation loops"
+  default_prompt: "Use $problemproof repo-gate or $problemproof experiment before starting a new repo or build."

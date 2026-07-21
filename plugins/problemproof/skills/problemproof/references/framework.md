@@ -9,7 +9,8 @@
 5. Evidence gate
 6. Bias and solution checks
 7. Experiment design
-8. Comparison and recommendation rules
+8. Lean Startup validated learning
+9. Comparison and recommendation rules
 
 ## 1. Evidence levels
 
@@ -210,7 +211,29 @@ Do not prescribe the ladder mechanically. Match the test to the critical assumpt
 
 Avoid leading questions such as “Would you use this?” Prefer recent incidents, current behavior, demonstrated cost, and real commitments.
 
-## 8. Comparison and recommendation rules
+## 8. Lean Startup validated learning
+
+Use Lean Startup as an experiment discipline inside ProblemProof:
+
+- ProblemProof decides whether the problem and segment are evidenced enough to justify opportunity shaping.
+- Validated Learning decides which assumption to test next and how to measure the result.
+- Build-Measure-Learn loops are valid only when they can change a decision.
+
+Before any MVP-like artifact, define:
+
+- value hypothesis;
+- growth hypothesis, or explicitly mark distribution unknown;
+- riskiest assumption;
+- primary actionable metric;
+- baseline or current state if known;
+- success, ambiguous, and failure thresholds;
+- pivot, persevere, stop, narrow, or reframe rule.
+
+Reject vanity metrics as primary evidence. Page views, likes, broad traffic, compliments, and generic waitlist signups can support channel learning only when tied to a narrow segment and a precommitted behavior threshold.
+
+Treat `persevere` as permission to test the next riskiest assumption, not permission to scale. Treat `pivot` as a structured strategy change: segment, channel, value proposition, workflow, revenue model, or problem framing. Treat `stop` as a valid successful learning outcome.
+
+## 9. Comparison and recommendation rules
 
 Compare multiple ideas dimension by dimension. Prioritize evidence quality, consequence, workaround dissatisfaction, behavior change, reachability, and decisive unknowns. Do not use total scores. Technical excitement is not a tiebreaker unless the user explicitly chooses a learning or creative project.
 

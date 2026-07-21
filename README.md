@@ -6,11 +6,9 @@
 ProblemProof prüft Probleme, bevor jemand Zeit in die nächste Lösung investiert. Das Repository enthält zwei komplementäre Oberflächen:
 
 - `apps/web`: ein öffentlicher, schneller Problem-Feed mit Astro, Cloudflare Workers und D1
-- `plugins/problemproof`: ein installierbarer Codex-Skill, der ein Problem lokal strukturiert und auf belastbare Evidenz prüft
+- `plugins/problemproof`: ein installierbarer Codex-Skill, der ein Problem lokal strukturiert, auf belastbare Evidenz prüft und Lean-Startup-Experimente als Lernschleife plant
 
-Die Website akzeptiert sowohl selbst erlebte Probleme als auch klar markierte Hypothesen. Ein Klick auf „Selbst erlebt“ erzeugt ein anonymes Bestätigungssignal; stärkere Evidenz entsteht nur durch einen strukturierten, konkreten Vorfall. Die öffentliche API gibt ausschließlich aggregierte Daten aus.
-
-Die nächste Ausbaustufe ersetzt anonyme Browser-Signale durch private, accountgestützte Teilnahme und verbindet den Skill mit der Veröffentlichungs-API. Das bestätigte Vertrauensmodell und der Authentifizierungsvertrag stehen in [docs/trust-identity-prd.md](docs/trust-identity-prd.md).
+Die Website akzeptiert sowohl selbst erlebte Probleme als auch klar markierte Hypothesen. Accountgestützte Reaktionen verhindern doppelte Validierungssignale; stärkere Evidenz entsteht durch strukturierte, konkrete Vorfälle. Die öffentliche API gibt ausschließlich aggregierte Daten aus.
 
 Produktion: [problemproof.moinsen.dev](https://problemproof.moinsen.dev)
 
@@ -24,7 +22,8 @@ npx skills add moinsen-dev/problemproof --skill problemproof
 ```
 
 Danach kann ein Problem beispielsweise mit `$problemproof capture`,
-`$problemproof validate` oder `$problemproof experiment` bearbeitet werden.
+`$problemproof validate`, `$problemproof hypotheses`, `$problemproof mvp`,
+`$problemproof loop` oder `$problemproof experiment` bearbeitet werden.
 
 ## Transparenz und Vertrauen
 
@@ -33,8 +32,8 @@ Designentscheidungen, Rechtstexte, Tests und den installierbaren Skill. Nicht
 öffentlich sind Produktionsdaten, Identifikatoren, Zugangsdaten und private
 Moderationsvorgänge.
 
-Das bestätigte Zielmodell ersetzt anonyme Browser-Signale durch private,
-accountgestützte Teilnahme. Öffentlich erscheinen nur aggregierte
+Das bestätigte Zielmodell nutzt private, accountgestützte Teilnahme statt
+anonymer Mehrfachsignale. Öffentlich erscheinen nur aggregierte
 Validierungssignale, niemals eine Liste der abstimmenden Personen. Details:
 [docs/trust-identity-prd.md](docs/trust-identity-prd.md).
 
